@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace IntegraFacturacion\Adapters\HttpIntegra;
+namespace IntegraDte\Adapters\HttpIntegra;
 
 use RuntimeException;
 
@@ -16,7 +16,7 @@ final class CurlTransport implements HttpTransportInterface
     {
         $curl = curl_init($url);
         if ($curl === false) {
-            throw new RuntimeException('integrafacturacion: unable to initialize curl');
+            throw new RuntimeException('integradte: unable to initialize curl');
         }
 
         $headerLines = [];
@@ -42,7 +42,7 @@ final class CurlTransport implements HttpTransportInterface
             $error = curl_error($curl);
             // CurlHandle is released automatically; explicit close is deprecated.
             $curl = null;
-            throw new RuntimeException('integrafacturacion: transport error: ' . $error);
+            throw new RuntimeException('integradte: transport error: ' . $error);
         }
         $curl = null;
 

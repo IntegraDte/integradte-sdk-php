@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace IntegraFacturacion\Tests;
+namespace IntegraDte\Tests;
 
-use IntegraFacturacion\Domain\Dte\Detalle;
-use IntegraFacturacion\Domain\Dte\Dte33Data;
-use IntegraFacturacion\Domain\Dte\Emisor;
-use IntegraFacturacion\Domain\Dte\Encabezado33;
-use IntegraFacturacion\Domain\Dte\IdDocBase;
-use IntegraFacturacion\Domain\Dte\Receptor;
-use IntegraFacturacion\Domain\Dte\Totales;
-use IntegraFacturacion\Domain\DteBuilder;
+use IntegraDte\Domain\Dte\Detalle;
+use IntegraDte\Domain\Dte\Dte33Data;
+use IntegraDte\Domain\Dte\Emisor;
+use IntegraDte\Domain\Dte\Encabezado33;
+use IntegraDte\Domain\Dte\IdDocBase;
+use IntegraDte\Domain\Dte\Receptor;
+use IntegraDte\Domain\Dte\Totales;
+use IntegraDte\Domain\DteBuilder;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 

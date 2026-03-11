@@ -1,17 +1,17 @@
-# integrafacturacion-sdk-php
+# integradte-sdk-php
 
-SDK en PHP para consumir la API de [IntegraFacturacion](https://integrafacturacion.cl), basado en arquitectura hexagonal.
+SDK en PHP para consumir la API de [IntegraDte](https://integradte.cl), basado en arquitectura hexagonal.
 
 ## Instalacion
 
 ```bash
-composer require joseluis21/integrafacturacion-sdk-php
+composer require joseluis21/integradte-sdk-php
 ```
 
 ## Estructura hexagonal
 
 - `src/Domain`: DTOs y builder para `data_dte`
-- `src/Ports`: contrato de salida (`IntegraFacturacionApiInterface`)
+- `src/Ports`: contrato de salida (`IntegraDteApiInterface`)
 - `src/Application`: capa de servicio/casos de uso
 - `src/Adapters/HttpIntegra`: adapter HTTP para la API
 
@@ -22,14 +22,14 @@ composer require joseluis21/integrafacturacion-sdk-php
 
 require 'vendor/autoload.php';
 
-use IntegraFacturacion\Adapters\HttpIntegra\Client;
-use IntegraFacturacion\Adapters\HttpIntegra\Config;
-use IntegraFacturacion\Application\Service;
-use IntegraFacturacion\Domain\CreateDocumentRequest;
+use IntegraDte\Adapters\HttpIntegra\Client;
+use IntegraDte\Adapters\HttpIntegra\Config;
+use IntegraDte\Application\Service;
+use IntegraDte\Domain\CreateDocumentRequest;
 
 $adapter = new Client(new Config(
     apiKey: 'TU_X_API_KEY'
-    // baseUrl: 'https://api.integrafacturacion.cl' // opcional
+    // baseUrl: 'https://api.integradte.cl' // opcional
 ));
 
 $service = new Service($adapter);
@@ -57,7 +57,7 @@ var_dump($response);
 ```php
 <?php
 
-use IntegraFacturacion\Domain\DteBuilder;
+use IntegraDte\Domain\DteBuilder;
 
 $request = DteBuilder::createDocumentRequestFromString(
     codeSii: '33',
@@ -73,14 +73,14 @@ $request = DteBuilder::createDocumentRequestFromString(
 ```php
 <?php
 
-use IntegraFacturacion\Domain\Dte\Detalle;
-use IntegraFacturacion\Domain\Dte\Dte33Data;
-use IntegraFacturacion\Domain\Dte\Emisor;
-use IntegraFacturacion\Domain\Dte\Encabezado33;
-use IntegraFacturacion\Domain\Dte\IdDocBase;
-use IntegraFacturacion\Domain\Dte\Receptor;
-use IntegraFacturacion\Domain\Dte\Totales;
-use IntegraFacturacion\Domain\DteBuilder;
+use IntegraDte\Domain\Dte\Detalle;
+use IntegraDte\Domain\Dte\Dte33Data;
+use IntegraDte\Domain\Dte\Emisor;
+use IntegraDte\Domain\Dte\Encabezado33;
+use IntegraDte\Domain\Dte\IdDocBase;
+use IntegraDte\Domain\Dte\Receptor;
+use IntegraDte\Domain\Dte\Totales;
+use IntegraDte\Domain\DteBuilder;
 
 $dte = new Dte33Data(
     encabezado: new Encabezado33(

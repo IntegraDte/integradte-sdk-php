@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace IntegraFacturacion\Domain;
+namespace IntegraDte\Domain;
 
 /**
  * @phpstan-type ApiResponse array<string, mixed>

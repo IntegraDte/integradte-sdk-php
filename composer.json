@@ -1,16 +1,16 @@
 {
-  "name": "joseluis21/integrafacturacion-sdk-php",
-  "description": "SDK en PHP para consumir la API de IntegraFacturacion.",
+  "name": "joseluis21/integradte-sdk-php",
+  "description": "SDK en PHP para consumir la API de IntegraDte.",
   "type": "library",
   "license": "MIT",
   "keywords": [
-    "integrafacturacion",
+    "integradte",
     "dte",
     "sii",
     "sdk",
     "php"
   ],
-  "homepage": "https://github.com/JoseLuis21/integrafacturacion-sdk-php",
+  "homepage": "https://github.com/JoseLuis21/integradte-sdk-php",
   "authors": [
     {
       "name": "Jose Luis",
@@ -27,7 +27,7 @@
   },
   "autoload": {
     "psr-4": {
-      "IntegraFacturacion\\": "src/"
+      "IntegraDte\\": "src/"
     },
     "files": [
       "src/Domain/Dte/JsonHelpers.php",
@@ -37,7 +37,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "IntegraFacturacion\\Tests\\": "tests/"
+      "IntegraDte\\Tests\\": "tests/"
     }
   },
   "scripts": {

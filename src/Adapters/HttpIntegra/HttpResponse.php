@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace IntegraFacturacion\Adapters\HttpIntegra;
+namespace IntegraDte\Adapters\HttpIntegra;
 
 final class HttpResponse
 {

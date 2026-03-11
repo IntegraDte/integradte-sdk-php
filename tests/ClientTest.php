@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace IntegraFacturacion\Tests;
+namespace IntegraDte\Tests;
 
-use IntegraFacturacion\Adapters\HttpIntegra\ApiError;
-use IntegraFacturacion\Adapters\HttpIntegra\Client;
-use IntegraFacturacion\Adapters\HttpIntegra\Config;
-use IntegraFacturacion\Adapters\HttpIntegra\HttpResponse;
-use IntegraFacturacion\Adapters\HttpIntegra\HttpTransportInterface;
-use IntegraFacturacion\Domain\CreateDocumentRequest;
+use IntegraDte\Adapters\HttpIntegra\ApiError;
+use IntegraDte\Adapters\HttpIntegra\Client;
+use IntegraDte\Adapters\HttpIntegra\Config;
+use IntegraDte\Adapters\HttpIntegra\HttpResponse;
+use IntegraDte\Adapters\HttpIntegra\HttpTransportInterface;
+use IntegraDte\Domain\CreateDocumentRequest;
 use PHPUnit\Framework\TestCase;
 
 final class ClientTest extends TestCase
@@ -61,7 +61,7 @@ final class ClientTest extends TestCase
             }
         };
 
-        $client = new Client(new Config(apiKey: 'key', baseUrl: 'https://api.integrafacturacion.cl', transport: $transport));
+        $client = new Client(new Config(apiKey: 'key', baseUrl: 'https://api.integradte.cl', transport: $transport));
         $client->getLastUsedFolio('33');
 
         self::assertStringContainsString('code_sii=33', $transport->url);

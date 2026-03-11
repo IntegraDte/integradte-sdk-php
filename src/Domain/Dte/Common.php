@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace IntegraFacturacion\Domain\Dte;
+namespace IntegraDte\Domain\Dte;
 
 final class Emisor implements \JsonSerializable
 {

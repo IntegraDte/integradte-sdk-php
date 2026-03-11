@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace IntegraFacturacion\Domain;
+namespace IntegraDte\Domain;
 
-use IntegraFacturacion\Domain\Dte\Dte33Data;
-use IntegraFacturacion\Domain\Dte\Dte34Data;
-use IntegraFacturacion\Domain\Dte\Dte39Data;
-use IntegraFacturacion\Domain\Dte\Dte41Data;
-use IntegraFacturacion\Domain\Dte\Dte46Data;
-use IntegraFacturacion\Domain\Dte\Dte52Data;
-use IntegraFacturacion\Domain\Dte\Dte56Data;
-use IntegraFacturacion\Domain\Dte\Dte61Data;
+use IntegraDte\Domain\Dte\Dte33Data;
+use IntegraDte\Domain\Dte\Dte34Data;
+use IntegraDte\Domain\Dte\Dte39Data;
+use IntegraDte\Domain\Dte\Dte41Data;
+use IntegraDte\Domain\Dte\Dte46Data;
+use IntegraDte\Domain\Dte\Dte52Data;
+use IntegraDte\Domain\Dte\Dte56Data;
+use IntegraDte\Domain\Dte\Dte61Data;
 use InvalidArgumentException;
 use JsonException;
 

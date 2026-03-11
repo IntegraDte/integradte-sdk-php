@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace IntegraFacturacion\Ports;
+namespace IntegraDte\Ports;
 
-use IntegraFacturacion\Domain\CreateBusinessRequest;
-use IntegraFacturacion\Domain\CreateCessionRequest;
-use IntegraFacturacion\Domain\CreateDocumentRequest;
-use IntegraFacturacion\Domain\CreatePurchaseRequest;
-use IntegraFacturacion\Domain\GeneratePdfRequest;
-use IntegraFacturacion\Domain\UpdateBusinessRequest;
-use IntegraFacturacion\Domain\UploadCertificateRequest;
-use IntegraFacturacion\Domain\UploadNumerationRequest;
+use IntegraDte\Domain\CreateBusinessRequest;
+use IntegraDte\Domain\CreateCessionRequest;
+use IntegraDte\Domain\CreateDocumentRequest;
+use IntegraDte\Domain\CreatePurchaseRequest;
+use IntegraDte\Domain\GeneratePdfRequest;
+use IntegraDte\Domain\UpdateBusinessRequest;
+use IntegraDte\Domain\UploadCertificateRequest;
+use IntegraDte\Domain\UploadNumerationRequest;
 
-interface IntegraFacturacionApiInterface
+interface IntegraDteApiInterface
 {
     /** @return array<string, mixed> */
     public function createDocument(CreateDocumentRequest $request): array;

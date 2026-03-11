@@ -2,32 +2,32 @@
 
 declare(strict_types=1);
 
-namespace IntegraFacturacion\Adapters\HttpIntegra;
+namespace IntegraDte\Adapters\HttpIntegra;
 
-use IntegraFacturacion\Domain\CreateBusinessRequest;
-use IntegraFacturacion\Domain\CreateCessionRequest;
-use IntegraFacturacion\Domain\CreateDocumentRequest;
-use IntegraFacturacion\Domain\CreatePurchaseRequest;
-use IntegraFacturacion\Domain\GeneratePdfRequest;
-use IntegraFacturacion\Domain\UpdateBusinessRequest;
-use IntegraFacturacion\Domain\UploadCertificateRequest;
-use IntegraFacturacion\Domain\UploadNumerationRequest;
-use IntegraFacturacion\Ports\IntegraFacturacionApiInterface;
+use IntegraDte\Domain\CreateBusinessRequest;
+use IntegraDte\Domain\CreateCessionRequest;
+use IntegraDte\Domain\CreateDocumentRequest;
+use IntegraDte\Domain\CreatePurchaseRequest;
+use IntegraDte\Domain\GeneratePdfRequest;
+use IntegraDte\Domain\UpdateBusinessRequest;
+use IntegraDte\Domain\UploadCertificateRequest;
+use IntegraDte\Domain\UploadNumerationRequest;
+use IntegraDte\Ports\IntegraDteApiInterface;
 use InvalidArgumentException;
 use JsonException;
 
-final class Client implements IntegraFacturacionApiInterface
+final class Client implements IntegraDteApiInterface
 {
     private readonly HttpTransportInterface $transport;
 
     public function __construct(private readonly Config $config)
     {
         if (trim($this->config->apiKey) === '') {
-            throw new InvalidArgumentException('integrafacturacion: API key is required');
+            throw new InvalidArgumentException('integradte: API key is required');
         }
 
         if (filter_var($this->config->baseUrl, FILTER_VALIDATE_URL) === false) {
-            throw new InvalidArgumentException('integrafacturacion: invalid base URL');
+            throw new InvalidArgumentException('integradte: invalid base URL');
         }
 
         $this->transport = $this->config->transport ?? new CurlTransport($this->config->timeoutSeconds);
@@ -148,7 +148,7 @@ final class Client implements IntegraFacturacionApiInterface
             try {
                 $payload = json_encode($body, JSON_THROW_ON_ERROR);
             } catch (JsonException $e) {
-                throw new InvalidArgumentException('integrafacturacion: invalid JSON body: ' . $e->getMessage(), 0, $e);
+                throw new InvalidArgumentException('integradte: invalid JSON body: ' . $e->getMessage(), 0, $e);
             }
 
             $headers['Content-Type'] = 'application/json';
@@ -173,7 +173,7 @@ final class Client implements IntegraFacturacionApiInterface
             $decoded = json_decode($response->body, true, 512, JSON_THROW_ON_ERROR);
             return $decoded;
         } catch (JsonException $e) {
-            throw new InvalidArgumentException('integrafacturacion: invalid response JSON: ' . $e->getMessage(), 0, $e);
+            throw new InvalidArgumentException('integradte: invalid response JSON: ' . $e->getMessage(), 0, $e);
         }
     }
 
@@ -200,7 +200,7 @@ final class Client implements IntegraFacturacionApiInterface
         try {
             return json_encode($payload, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            throw new InvalidArgumentException('integrafacturacion: invalid DTE payload: ' . $e->getMessage(), 0, $e);
+            throw new InvalidArgumentException('integradte: invalid DTE payload: ' . $e->getMessage(), 0, $e);
         }
     }
 }
