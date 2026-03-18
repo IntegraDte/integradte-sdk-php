@@ -1,5 +1,5 @@
 {
-  "name": "IntegraDte/integradte-sdk-php",
+  "name": "integradte/integradte-sdk-php",
   "description": "SDK en PHP para consumir la API de IntegraDte.",
   "type": "library",
   "license": "MIT",
@@ -13,7 +13,7 @@
   "homepage": "https://github.com/IntegraDte/integradte-sdk-php",
   "authors": [
     {
-      "name": "Jose Luis",
+      "name": "IntegraDte",
       "homepage": "https://github.com/IntegraDte"
     }
   ],
