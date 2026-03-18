@@ -5,7 +5,7 @@ SDK en PHP para consumir la API de [IntegraDte](https://integradte.cl), basado e
 ## Instalacion
 
 ```bash
-composer require joseluis21/integradte-sdk-php
+composer require IntegraDte/integradte-sdk-php
 ```
 
 ## Estructura hexagonal
