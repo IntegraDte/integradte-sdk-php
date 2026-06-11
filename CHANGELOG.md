@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.1.3...integradte-sdk-php-v0.1.4) (2026-03-18)
+
+
+### Bug Fixes
+
+* **package:** update package name and homepage to reflect correct organization ([bfd8f07](https://github.com/IntegraDte/integradte-sdk-php/commit/bfd8f073fb3a77edb6e27b8c7b67d4b22a563c6e))
+
 ## [0.1.3](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.1.2...integradte-sdk-php-v0.1.3) (2026-03-18)
 
 ### Features
