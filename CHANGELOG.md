@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.5](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.1.4...integradte-sdk-php-v0.1.5) (2026-06-11)
+
+
+### Features
+
+* **ports:** create ExtendedIntegraDteApiInterface for extended API functionalities ([4a7adc7](https://github.com/IntegraDte/integradte-sdk-php/commit/4a7adc755ab20a9b3bd4110086e70eeeedd7ab62))
+* **service:** add extended API methods for document and license management ([4a7adc7](https://github.com/IntegraDte/integradte-sdk-php/commit/4a7adc755ab20a9b3bd4110086e70eeeedd7ab62))
+* **tests:** implement comprehensive tests for new service methods and API interactions ([4a7adc7](https://github.com/IntegraDte/integradte-sdk-php/commit/4a7adc755ab20a9b3bd4110086e70eeeedd7ab62))
+
 ## [0.1.4](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.1.3...integradte-sdk-php-v0.1.4) (2026-03-18)
 
 
