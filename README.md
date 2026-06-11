@@ -111,20 +111,45 @@ $request = DteBuilder::dte33ToRequest(
 ## Endpoints implementados
 
 - `createDocument`
+- `getDocuments`
 - `getDocument`
 - `getDocumentStats`
+- `getDocumentStatsWithFilters`
 - `createCession`
 - `generatePdf`
 - `createBusiness`
+- `getBusinesses`
+- `getBusiness`
+- `enableProductionMode`
+- `enableCertificationMode`
 - `updateBusiness`
 - `uploadCertificate`
 - `getCertificateInfo`
 - `getMe`
+- `getBillingBalance`
+- `getBillingPayments`
 - `createPurchase`
+- `getPurchaseAcknowledgments`
 - `getNumerationSummary`
 - `getLastUsedFolio`
 - `uploadNumeration`
 - `deleteNumeration`
+- `getCurrentCertificate`
+- `createLicense`
+- `getLicenses`
+- `getLicense`
+- `getLicenseDevices`
+- `enableLicense`
+- `disableLicense`
+- `revokeLicense`
+- `activateLicense`
+- `refreshLicense`
+- `requestNumbers`
+- `requestNumerationsViaRabbitMq`
+- `syncDocument`
+- `requeueDocument`
+- `requeueOfflineDocument`
+- `requeueDocumentStatus`
 
 ## Workflows incluidos
 

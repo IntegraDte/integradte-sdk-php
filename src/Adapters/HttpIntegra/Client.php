@@ -12,11 +12,11 @@ use IntegraDte\Domain\GeneratePdfRequest;
 use IntegraDte\Domain\UpdateBusinessRequest;
 use IntegraDte\Domain\UploadCertificateRequest;
 use IntegraDte\Domain\UploadNumerationRequest;
-use IntegraDte\Ports\IntegraDteApiInterface;
+use IntegraDte\Ports\ExtendedIntegraDteApiInterface;
 use InvalidArgumentException;
 use JsonException;
 
-final class Client implements IntegraDteApiInterface
+final class Client implements ExtendedIntegraDteApiInterface
 {
     private readonly HttpTransportInterface $transport;
 
@@ -45,10 +45,28 @@ final class Client implements IntegraDteApiInterface
         return $this->doJson('GET', '/api/v1/documents/' . rawurlencode($id));
     }
 
+    /**
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function getDocuments(array $filters = []): array
+    {
+        return $this->doJson('GET', '/api/v1/documents', null, $filters);
+    }
+
     /** @return array<string, mixed> */
     public function getDocumentStats(): array
     {
         return $this->doJson('GET', '/api/v1/documents/stats');
+    }
+
+    /**
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function getDocumentStatsWithFilters(array $filters = []): array
+    {
+        return $this->doJson('GET', '/api/v1/documents/stats', null, $filters);
     }
 
     /** @return array<string, mixed> */
@@ -76,6 +94,33 @@ final class Client implements IntegraDteApiInterface
     }
 
     /** @return array<string, mixed> */
+    public function getBusinesses(): array
+    {
+        return $this->doJson('GET', '/api/v1/businesses');
+    }
+
+    /** @return array<string, mixed> */
+    public function getBusiness(string $id): array
+    {
+        return $this->doJson('GET', '/api/v1/businesses/' . rawurlencode($id));
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function enableProductionMode(array $payload): array
+    {
+        return $this->doJson('POST', '/api/v1/businesses/production-mode', $payload);
+    }
+
+    /** @return array<string, mixed> */
+    public function enableCertificationMode(): array
+    {
+        return $this->doJson('POST', '/api/v1/businesses/certification-mode');
+    }
+
+    /** @return array<string, mixed> */
     public function updateBusiness(string $id, UpdateBusinessRequest $request): array
     {
         return $this->doJson('PUT', '/api/v1/businesses/' . rawurlencode($id), $request->toArray(), [], $request->idempotencyKey);
@@ -100,9 +145,33 @@ final class Client implements IntegraDteApiInterface
     }
 
     /** @return array<string, mixed> */
+    public function getBillingBalance(): array
+    {
+        return $this->doJson('GET', '/api/v1/billing/balance');
+    }
+
+    /**
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function getBillingPayments(array $filters = []): array
+    {
+        return $this->doJson('GET', '/api/v1/billing/payments', null, $filters);
+    }
+
+    /** @return array<string, mixed> */
     public function createPurchase(CreatePurchaseRequest $request): array
     {
         return $this->doJson('POST', '/api/v1/purchases', $request->toArray(), [], $request->idempotencyKey);
+    }
+
+    /**
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function getPurchaseAcknowledgments(array $filters = []): array
+    {
+        return $this->doJson('GET', '/api/v1/purchase-acknowledgments', null, $filters);
     }
 
     /** @return array<string, mixed> */
@@ -129,9 +198,141 @@ final class Client implements IntegraDteApiInterface
         return $this->doJson('DELETE', '/api/v1/numerations/' . rawurlencode($id));
     }
 
+    /** @return array<string, mixed> */
+    public function getCurrentCertificate(): array
+    {
+        return $this->doJson('GET', '/api/v1/certificates/current');
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function createLicense(array $payload): array
+    {
+        return $this->doJson('POST', '/api/v1/licenses', $payload);
+    }
+
+    /** @return array<string, mixed> */
+    public function getLicenses(): array
+    {
+        return $this->doJson('GET', '/api/v1/licenses');
+    }
+
+    /** @return array<string, mixed> */
+    public function getLicense(string $id): array
+    {
+        return $this->doJson('GET', '/api/v1/licenses/' . rawurlencode($id));
+    }
+
+    /** @return array<string, mixed> */
+    public function getLicenseDevices(string $id): array
+    {
+        return $this->doJson('GET', '/api/v1/licenses/' . rawurlencode($id) . '/devices');
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function enableLicense(string $id, array $payload = []): array
+    {
+        return $this->doJson('POST', '/api/v1/licenses/' . rawurlencode($id) . '/enable', $payload);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function disableLicense(string $id, array $payload = []): array
+    {
+        return $this->doJson('POST', '/api/v1/licenses/' . rawurlencode($id) . '/disable', $payload);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function revokeLicense(string $id, array $payload = []): array
+    {
+        return $this->doJson('POST', '/api/v1/licenses/' . rawurlencode($id) . '/revoke', $payload);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function activateLicense(array $payload): array
+    {
+        return $this->doJson('POST', '/api/v1/licenses/activate', $payload);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function refreshLicense(array $payload): array
+    {
+        return $this->doJson('POST', '/api/v1/licenses/refresh', $payload);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return list<array<string, mixed>>
+     */
+    public function requestNumbers(array $payload): array
+    {
+        return $this->doJson('POST', '/v1/numbers/request', $payload);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function requestNumerationsViaRabbitMq(array $payload): array
+    {
+        return $this->doJson('POST', '/api/v1/numerations/request-rabbitmq', $payload);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function syncDocument(array $payload): array
+    {
+        return $this->doJson('POST', '/api/v1/documents/sync', $payload);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function requeueDocument(array $payload): array
+    {
+        return $this->doJson('POST', '/api/v1/documents/requeue', $payload);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function requeueOfflineDocument(array $payload): array
+    {
+        return $this->doJson('POST', '/api/v1/documents/requeue/offline', $payload);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @return array<string, mixed>
+     */
+    public function requeueDocumentStatus(array $payload): array
+    {
+        return $this->doJson('POST', '/api/v1/documents/requeue/status', $payload);
+    }
+
     /**
      * @param array<string, mixed>|null $body
-     * @param array<string, string> $query
+     * @param array<string, scalar|null> $query
      * @return array<string, mixed>
      */
     private function doJson(string $method, string $route, ?array $body = null, array $query = [], ?string $idempotencyKey = null): array
@@ -178,7 +379,7 @@ final class Client implements IntegraDteApiInterface
     }
 
     /**
-     * @param array<string, string> $query
+     * @param array<string, scalar|null> $query
      */
     private function buildUrl(string $route, array $query = []): string
     {
