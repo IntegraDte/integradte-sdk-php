@@ -10,6 +10,7 @@ use IntegraDte\Adapters\HttpIntegra\Config;
 use IntegraDte\Adapters\HttpIntegra\HttpResponse;
 use IntegraDte\Adapters\HttpIntegra\HttpTransportInterface;
 use IntegraDte\Domain\CreateDocumentRequest;
+use IntegraDte\Domain\CreatePurchaseRequest;
 use PHPUnit\Framework\TestCase;
 
 final class ClientTest extends TestCase
@@ -112,7 +113,7 @@ final class ClientTest extends TestCase
         $client = new Client(new Config(apiKey: 'key', baseUrl: 'https://api.integradte.cl', transport: $transport));
 
         $client->requestNumbers(['document_type' => 33, 'quantity' => 4]);
-        $this->assertRecordedRequest($transport->history[0], 'POST', '/v1/numbers/request', [
+        $this->assertRecordedRequest($transport->history[0], 'POST', '/api/v1/numerations/request', [
             'document_type' => 33,
             'quantity' => 4,
         ]);
@@ -160,6 +161,38 @@ final class ClientTest extends TestCase
         // A business without a certificate is a 200 with false, not an error.
         self::assertFalse($client->getCertificateInfo()['data']['has_valid_certificate']);
         $this->assertRecordedRequest($transport->history[1], 'GET', '/api/v1/business/certificate-info');
+    }
+
+    public function testCreatePurchasePostsToPurchaseAcknowledgmentsWithIdempotencyKey(): void
+    {
+        $transport = new RecordingTransport();
+        $client = new Client(new Config(apiKey: 'key', baseUrl: 'https://api.integradte.cl', transport: $transport));
+
+        $client->createPurchase(new CreatePurchaseRequest(
+            xmlBase64: 'BASE64',
+            rutEmisor: '76123456-7',
+            razonSocialEmisor: 'Proveedor SpA',
+            tipoDte: '33',
+            folio: 1234,
+            mntTotal: '119000',
+            fechaEmision: '2026-09-01',
+            emailEmisor: 'dte@proveedor.cl',
+            accionDoc: 'ACD',
+            idempotencyKey: 'idem-purchase-1',
+        ));
+
+        $this->assertRecordedRequest($transport->history[0], 'POST', '/api/v1/purchase-acknowledgments', [
+            'xml_base64' => 'BASE64',
+            'rut_emisor' => '76123456-7',
+            'razon_social_emisor' => 'Proveedor SpA',
+            'tipo_dte' => '33',
+            'folio' => 1234,
+            'mnt_total' => '119000',
+            'fecha_emision' => '2026-09-01',
+            'email_emisor' => 'dte@proveedor.cl',
+            'accion_doc' => 'ACD',
+        ]);
+        self::assertSame('idem-purchase-1', $transport->history[0]['headers']['idempotency-key'] ?? null);
     }
 
     public function testPurchaseAcknowledgmentsAndStatsFiltersUseExpectedRoutes(): void
