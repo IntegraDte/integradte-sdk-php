@@ -99,7 +99,7 @@ final class ServiceTest extends TestCase
     public static function unsupportedExtendedOperationProvider(): iterable
     {
         yield 'getDocuments' => ['method' => 'getDocuments', 'arguments' => [['status' => 'accepted']]];
-        yield 'activateLicense' => ['method' => 'activateLicense', 'arguments' => [['license_key' => 'ABC']]];
+        yield 'requestNumbers' => ['method' => 'requestNumbers', 'arguments' => [['document_type' => 33, 'quantity' => 4]]];
         yield 'requeueOfflineDocument' => ['method' => 'requeueOfflineDocument', 'arguments' => [['document_id' => 'doc-offline-1']]];
     }
 
@@ -174,66 +174,6 @@ final class ServiceTest extends TestCase
             'response' => ['data' => [['id' => 'ack-1']]],
         ];
 
-        yield 'getCurrentCertificate' => [
-            'method' => 'getCurrentCertificate',
-            'arguments' => [],
-            'response' => ['serial' => 'SER-1'],
-        ];
-
-        yield 'createLicense' => [
-            'method' => 'createLicense',
-            'arguments' => [['name' => 'Caja 01']],
-            'response' => ['id' => 'lic-1'],
-        ];
-
-        yield 'getLicenses' => [
-            'method' => 'getLicenses',
-            'arguments' => [],
-            'response' => ['items' => [['id' => 'lic-1']]],
-        ];
-
-        yield 'getLicense' => [
-            'method' => 'getLicense',
-            'arguments' => ['lic-1'],
-            'response' => ['id' => 'lic-1'],
-        ];
-
-        yield 'getLicenseDevices' => [
-            'method' => 'getLicenseDevices',
-            'arguments' => ['lic-1'],
-            'response' => ['devices' => [['id' => 'dev-1']]],
-        ];
-
-        yield 'enableLicense' => [
-            'method' => 'enableLicense',
-            'arguments' => ['lic-1', ['reason' => 'manual_enable']],
-            'response' => ['enabled' => true],
-        ];
-
-        yield 'disableLicense' => [
-            'method' => 'disableLicense',
-            'arguments' => ['lic-1', ['reason' => 'payment_pending']],
-            'response' => ['enabled' => false],
-        ];
-
-        yield 'revokeLicense' => [
-            'method' => 'revokeLicense',
-            'arguments' => ['lic-1', ['reason' => 'device_compromised']],
-            'response' => ['revoked' => true],
-        ];
-
-        yield 'activateLicense' => [
-            'method' => 'activateLicense',
-            'arguments' => [['license_key' => 'ABC', 'device_id' => 'machine-id']],
-            'response' => ['offline_token' => 'offline-1', 'activated' => true],
-        ];
-
-        yield 'refreshLicense' => [
-            'method' => 'refreshLicense',
-            'arguments' => [['device_id' => 'machine-id', 'offline_token' => 'offline-1']],
-            'response' => ['offline_token' => 'offline-2'],
-        ];
-
         yield 'requestNumbers' => [
             'method' => 'requestNumbers',
             'arguments' => [['document_type' => 33, 'quantity' => 4]],
@@ -244,12 +184,6 @@ final class ServiceTest extends TestCase
             'method' => 'requestNumerationsViaRabbitMq',
             'arguments' => [['code_sii' => '33', 'quantity' => 120]],
             'response' => ['queued' => true],
-        ];
-
-        yield 'syncDocument' => [
-            'method' => 'syncDocument',
-            'arguments' => [['document_id' => 'DTE_33_xxx']],
-            'response' => ['document_id' => 'DTE_33_xxx', 'status' => 'SYNCED'],
         ];
 
         yield 'requeueDocument' => [
@@ -576,56 +510,6 @@ final class ServiceTest extends TestCase
                 return [];
             }
 
-            public function getCurrentCertificate(): array
-            {
-                return $this->record(__FUNCTION__, []);
-            }
-
-            public function createLicense(array $payload): array
-            {
-                return $this->record(__FUNCTION__, [$payload]);
-            }
-
-            public function getLicenses(): array
-            {
-                return $this->record(__FUNCTION__, []);
-            }
-
-            public function getLicense(string $id): array
-            {
-                return $this->record(__FUNCTION__, [$id]);
-            }
-
-            public function getLicenseDevices(string $id): array
-            {
-                return $this->record(__FUNCTION__, [$id]);
-            }
-
-            public function enableLicense(string $id, array $payload = []): array
-            {
-                return $this->record(__FUNCTION__, [$id, $payload]);
-            }
-
-            public function disableLicense(string $id, array $payload = []): array
-            {
-                return $this->record(__FUNCTION__, [$id, $payload]);
-            }
-
-            public function revokeLicense(string $id, array $payload = []): array
-            {
-                return $this->record(__FUNCTION__, [$id, $payload]);
-            }
-
-            public function activateLicense(array $payload): array
-            {
-                return $this->record(__FUNCTION__, [$payload]);
-            }
-
-            public function refreshLicense(array $payload): array
-            {
-                return $this->record(__FUNCTION__, [$payload]);
-            }
-
             /**
              * @return list<array<string, mixed>>
              */
@@ -635,11 +519,6 @@ final class ServiceTest extends TestCase
             }
 
             public function requestNumerationsViaRabbitMq(array $payload): array
-            {
-                return $this->record(__FUNCTION__, [$payload]);
-            }
-
-            public function syncDocument(array $payload): array
             {
                 return $this->record(__FUNCTION__, [$payload]);
             }

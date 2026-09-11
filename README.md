@@ -108,6 +108,23 @@ $request = DteBuilder::dte33ToRequest(
 );
 ```
 
+## Verificar el certificado de la empresa
+
+`getCertificateInfo` (`GET /api/v1/business/certificate-info`) solo responde si la empresa puede firmar. No devuelve datos del certificado:
+
+```php
+<?php
+
+$info = $service->getCertificateInfo();
+// ['success' => true, 'message' => '...', 'data' => ['has_valid_certificate' => true]]
+
+if (!$info['data']['has_valid_certificate']) {
+    // Sin certificado, no abre con la contraseña guardada o vencido: subir uno con uploadCertificate.
+}
+```
+
+`has_valid_certificate` es `true` cuando la empresa tiene certificado, este abre con la contraseña guardada y no esta vencido (la misma validacion que usa la emision). Si la empresa no tiene certificado la respuesta es `200` con `false`.
+
 ## Endpoints implementados
 
 - `createDocument`
@@ -134,19 +151,8 @@ $request = DteBuilder::dte33ToRequest(
 - `getLastUsedFolio`
 - `uploadNumeration`
 - `deleteNumeration`
-- `getCurrentCertificate`
-- `createLicense`
-- `getLicenses`
-- `getLicense`
-- `getLicenseDevices`
-- `enableLicense`
-- `disableLicense`
-- `revokeLicense`
-- `activateLicense`
-- `refreshLicense`
 - `requestNumbers`
 - `requestNumerationsViaRabbitMq`
-- `syncDocument`
 - `requeueDocument`
 - `requeueOfflineDocument`
 - `requeueDocumentStatus`

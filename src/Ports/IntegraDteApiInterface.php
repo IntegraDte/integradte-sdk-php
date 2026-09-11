@@ -39,7 +39,12 @@ interface IntegraDteApiInterface
     /** @return array<string, mixed> */
     public function uploadCertificate(string $businessId, UploadCertificateRequest $request): array;
 
-    /** @return array<string, mixed> */
+    /**
+     * `data.has_valid_certificate` is true when the business has a certificate that opens
+     * with its stored password and is not expired.
+     *
+     * @return array{success: bool, message: string, data: array{has_valid_certificate: bool}}
+     */
     public function getCertificateInfo(): array;
 
     /** @return array<string, mixed> */

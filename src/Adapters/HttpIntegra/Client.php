@@ -132,7 +132,12 @@ final class Client implements ExtendedIntegraDteApiInterface
         return $this->doJson('PUT', '/api/v1/business/' . rawurlencode($businessId) . '/certificate', $request->toArray());
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * `data.has_valid_certificate` is true when the business has a certificate that opens
+     * with its stored password and is not expired.
+     *
+     * @return array{success: bool, message: string, data: array{has_valid_certificate: bool}}
+     */
     public function getCertificateInfo(): array
     {
         return $this->doJson('GET', '/api/v1/business/certificate-info');
@@ -198,84 +203,6 @@ final class Client implements ExtendedIntegraDteApiInterface
         return $this->doJson('DELETE', '/api/v1/numerations/' . rawurlencode($id));
     }
 
-    /** @return array<string, mixed> */
-    public function getCurrentCertificate(): array
-    {
-        return $this->doJson('GET', '/api/v1/certificates/current');
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function createLicense(array $payload): array
-    {
-        return $this->doJson('POST', '/api/v1/licenses', $payload);
-    }
-
-    /** @return array<string, mixed> */
-    public function getLicenses(): array
-    {
-        return $this->doJson('GET', '/api/v1/licenses');
-    }
-
-    /** @return array<string, mixed> */
-    public function getLicense(string $id): array
-    {
-        return $this->doJson('GET', '/api/v1/licenses/' . rawurlencode($id));
-    }
-
-    /** @return array<string, mixed> */
-    public function getLicenseDevices(string $id): array
-    {
-        return $this->doJson('GET', '/api/v1/licenses/' . rawurlencode($id) . '/devices');
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function enableLicense(string $id, array $payload = []): array
-    {
-        return $this->doJson('POST', '/api/v1/licenses/' . rawurlencode($id) . '/enable', $payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function disableLicense(string $id, array $payload = []): array
-    {
-        return $this->doJson('POST', '/api/v1/licenses/' . rawurlencode($id) . '/disable', $payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function revokeLicense(string $id, array $payload = []): array
-    {
-        return $this->doJson('POST', '/api/v1/licenses/' . rawurlencode($id) . '/revoke', $payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function activateLicense(array $payload): array
-    {
-        return $this->doJson('POST', '/api/v1/licenses/activate', $payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function refreshLicense(array $payload): array
-    {
-        return $this->doJson('POST', '/api/v1/licenses/refresh', $payload);
-    }
-
     /**
      * @param array<string, mixed> $payload
      * @return list<array<string, mixed>>
@@ -292,15 +219,6 @@ final class Client implements ExtendedIntegraDteApiInterface
     public function requestNumerationsViaRabbitMq(array $payload): array
     {
         return $this->doJson('POST', '/api/v1/numerations/request-rabbitmq', $payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function syncDocument(array $payload): array
-    {
-        return $this->doJson('POST', '/api/v1/documents/sync', $payload);
     }
 
     /**
