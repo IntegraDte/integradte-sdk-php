@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.2.0...integradte-sdk-php-v0.2.1) (2026-09-11)
+
+
+### Bug Fixes
+
+* **api:** point createPurchase and requestNumbers at the current API routes ([aaaed9e](https://github.com/IntegraDte/integradte-sdk-php/commit/aaaed9ef5e25d549a574f3542fd59f8de2386fac))
+* **api:** point createPurchase and requestNumbers at the current API routes ([092f58d](https://github.com/IntegraDte/integradte-sdk-php/commit/092f58d63ea6071dd50d39ffb7e66119f94c92ab))
+
 ## [0.2.0](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.1.4...integradte-sdk-php-v0.2.0) (2026-09-11)
 
 
