@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.0](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.1.4...integradte-sdk-php-v0.2.0) (2026-09-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **api:** removed Client/Service/ExtendedIntegraDteApiInterface methods getCurrentCertificate(), createLicense(), getLicenses(), getLicense(), getLicenseDevices(), enableLicense(), disableLicense(), revokeLicense(), activateLicense(), refreshLicense() and syncDocument(). getCertificateInfo() now returns {"success", "message", "data": {"has_valid_certificate": bool}} instead of the certificate details (subject, RUT, dates), and a business without a certificate is a 200 with false instead of a 400 ApiError.
+
+### Features
+
+* **api:** sync SDK with the public API, drop licenses, document sync and current certificate ([ed4ff18](https://github.com/IntegraDte/integradte-sdk-php/commit/ed4ff180d98c4bd4b253f8a2252db493583b1cda))
+* **ports:** create ExtendedIntegraDteApiInterface for extended API functionalities ([4a7adc7](https://github.com/IntegraDte/integradte-sdk-php/commit/4a7adc755ab20a9b3bd4110086e70eeeedd7ab62))
+* **service:** add extended API methods for document and license management ([4a7adc7](https://github.com/IntegraDte/integradte-sdk-php/commit/4a7adc755ab20a9b3bd4110086e70eeeedd7ab62))
+* **tests:** implement comprehensive tests for new service methods and API interactions ([4a7adc7](https://github.com/IntegraDte/integradte-sdk-php/commit/4a7adc755ab20a9b3bd4110086e70eeeedd7ab62))
+
 ## [0.1.4](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.1.3...integradte-sdk-php-v0.1.4) (2026-03-18)
 
 
