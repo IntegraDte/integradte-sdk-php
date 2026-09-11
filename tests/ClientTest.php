@@ -106,84 +106,60 @@ final class ClientTest extends TestCase
         ]);
     }
 
-    public function testLicenseAndDocumentUtilityEndpointsUseExpectedRoutes(): void
+    public function testNumerationAndDocumentUtilityEndpointsUseExpectedRoutes(): void
     {
         $transport = new RecordingTransport();
         $client = new Client(new Config(apiKey: 'key', baseUrl: 'https://api.integradte.cl', transport: $transport));
 
-        $client->getCurrentCertificate();
-        $this->assertRecordedRequest($transport->history[0], 'GET', '/api/v1/certificates/current');
-
-        $client->createLicense(['name' => 'Caja 01']);
-        $this->assertRecordedRequest($transport->history[1], 'POST', '/api/v1/licenses', [
-            'name' => 'Caja 01',
-        ]);
-
-        $client->getLicenses();
-        $this->assertRecordedRequest($transport->history[2], 'GET', '/api/v1/licenses');
-
-        $client->getLicense('lic_01');
-        $this->assertRecordedRequest($transport->history[3], 'GET', '/api/v1/licenses/lic_01');
-
-        $client->getLicenseDevices('lic_01');
-        $this->assertRecordedRequest($transport->history[4], 'GET', '/api/v1/licenses/lic_01/devices');
-
-        $client->enableLicense('lic_01', ['reason' => 'manual_enable']);
-        $this->assertRecordedRequest($transport->history[5], 'POST', '/api/v1/licenses/lic_01/enable', [
-            'reason' => 'manual_enable',
-        ]);
-
-        $client->disableLicense('lic_01', ['reason' => 'payment_pending']);
-        $this->assertRecordedRequest($transport->history[6], 'POST', '/api/v1/licenses/lic_01/disable', [
-            'reason' => 'payment_pending',
-        ]);
-
-        $client->revokeLicense('lic_01', ['reason' => 'device_compromised']);
-        $this->assertRecordedRequest($transport->history[7], 'POST', '/api/v1/licenses/lic_01/revoke', [
-            'reason' => 'device_compromised',
-        ]);
-
-        $client->activateLicense(['license_key' => 'ABC']);
-        $this->assertRecordedRequest($transport->history[8], 'POST', '/api/v1/licenses/activate', [
-            'license_key' => 'ABC',
-        ]);
-
-        $client->refreshLicense(['device_id' => 'machine-id']);
-        $this->assertRecordedRequest($transport->history[9], 'POST', '/api/v1/licenses/refresh', [
-            'device_id' => 'machine-id',
-        ]);
-
         $client->requestNumbers(['document_type' => 33, 'quantity' => 4]);
-        $this->assertRecordedRequest($transport->history[10], 'POST', '/v1/numbers/request', [
+        $this->assertRecordedRequest($transport->history[0], 'POST', '/v1/numbers/request', [
             'document_type' => 33,
             'quantity' => 4,
         ]);
 
         $client->requestNumerationsViaRabbitMq(['code_sii' => '33', 'quantity' => 120]);
-        $this->assertRecordedRequest($transport->history[11], 'POST', '/api/v1/numerations/request-rabbitmq', [
+        $this->assertRecordedRequest($transport->history[1], 'POST', '/api/v1/numerations/request-rabbitmq', [
             'code_sii' => '33',
             'quantity' => 120,
         ]);
 
-        $client->syncDocument(['document_id' => 'DTE_33_xxx']);
-        $this->assertRecordedRequest($transport->history[12], 'POST', '/api/v1/documents/sync', [
-            'document_id' => 'DTE_33_xxx',
-        ]);
-
         $client->requeueDocument(['document_id' => 'doc-1']);
-        $this->assertRecordedRequest($transport->history[13], 'POST', '/api/v1/documents/requeue', [
+        $this->assertRecordedRequest($transport->history[2], 'POST', '/api/v1/documents/requeue', [
             'document_id' => 'doc-1',
         ]);
 
         $client->requeueOfflineDocument(['document_id' => 'doc-offline-1']);
-        $this->assertRecordedRequest($transport->history[14], 'POST', '/api/v1/documents/requeue/offline', [
+        $this->assertRecordedRequest($transport->history[3], 'POST', '/api/v1/documents/requeue/offline', [
             'document_id' => 'doc-offline-1',
         ]);
 
         $client->requeueDocumentStatus(['document_id' => 'doc-offline-1']);
-        $this->assertRecordedRequest($transport->history[15], 'POST', '/api/v1/documents/requeue/status', [
+        $this->assertRecordedRequest($transport->history[4], 'POST', '/api/v1/documents/requeue/status', [
             'document_id' => 'doc-offline-1',
         ]);
+    }
+
+    public function testGetCertificateInfoReturnsValidityFlag(): void
+    {
+        $transport = new RecordingTransport([
+            '{"success":true,"message":"certificate info retrieved successfully","data":{"has_valid_certificate":true}}',
+            '{"success":true,"message":"certificate info retrieved successfully","data":{"has_valid_certificate":false}}',
+        ]);
+        $client = new Client(new Config(apiKey: 'key', baseUrl: 'https://api.integradte.cl', transport: $transport));
+
+        self::assertSame(
+            [
+                'success' => true,
+                'message' => 'certificate info retrieved successfully',
+                'data' => ['has_valid_certificate' => true],
+            ],
+            $client->getCertificateInfo()
+        );
+        $this->assertRecordedRequest($transport->history[0], 'GET', '/api/v1/business/certificate-info');
+
+        // A business without a certificate is a 200 with false, not an error.
+        self::assertFalse($client->getCertificateInfo()['data']['has_valid_certificate']);
+        $this->assertRecordedRequest($transport->history[1], 'GET', '/api/v1/business/certificate-info');
     }
 
     public function testPurchaseAcknowledgmentsAndStatsFiltersUseExpectedRoutes(): void
@@ -209,9 +185,6 @@ final class ClientTest extends TestCase
     {
         $transport = new RecordingTransport([
             '[{"document_type":33,"start":100,"end":103}]',
-            '{"document_id":"DTE_33_xxx","status":"SYNCED","sii_status":"ACEPTADO"}',
-            '{"license_key":"ABC","offline_token":"offline-1","activated":true}',
-            '{"offline_token":"offline-2","expires_at":"2026-07-01T00:00:00Z"}',
         ]);
         $client = new Client(new Config(apiKey: 'key', baseUrl: 'https://api.integradte.cl', transport: $transport));
 
@@ -221,27 +194,6 @@ final class ClientTest extends TestCase
             $client->requestNumbers($requestNumbersPayload)
         );
         self::assertSame($requestNumbersPayload, json_decode((string) $transport->history[0]['body'], true, 512, JSON_THROW_ON_ERROR));
-
-        $syncPayload = ['document_id' => 'DTE_33_xxx'];
-        self::assertSame(
-            ['document_id' => 'DTE_33_xxx', 'status' => 'SYNCED', 'sii_status' => 'ACEPTADO'],
-            $client->syncDocument($syncPayload)
-        );
-        self::assertSame($syncPayload, json_decode((string) $transport->history[1]['body'], true, 512, JSON_THROW_ON_ERROR));
-
-        $activatePayload = ['license_key' => 'ABC', 'device_id' => 'machine-id'];
-        self::assertSame(
-            ['license_key' => 'ABC', 'offline_token' => 'offline-1', 'activated' => true],
-            $client->activateLicense($activatePayload)
-        );
-        self::assertSame($activatePayload, json_decode((string) $transport->history[2]['body'], true, 512, JSON_THROW_ON_ERROR));
-
-        $refreshPayload = ['device_id' => 'machine-id', 'offline_token' => 'offline-1'];
-        self::assertSame(
-            ['offline_token' => 'offline-2', 'expires_at' => '2026-07-01T00:00:00Z'],
-            $client->refreshLicense($refreshPayload)
-        );
-        self::assertSame($refreshPayload, json_decode((string) $transport->history[3]['body'], true, 512, JSON_THROW_ON_ERROR));
     }
 
     /**

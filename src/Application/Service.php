@@ -115,7 +115,12 @@ final class Service
         return $this->api->uploadCertificate($businessId, $request);
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * `data.has_valid_certificate` is true when the business has a certificate that opens
+     * with its stored password and is not expired.
+     *
+     * @return array{success: bool, message: string, data: array{has_valid_certificate: bool}}
+     */
     public function getCertificateInfo(): array
     {
         return $this->api->getCertificateInfo();
@@ -181,84 +186,6 @@ final class Service
         return $this->api->deleteNumeration($id);
     }
 
-    /** @return array<string, mixed> */
-    public function getCurrentCertificate(): array
-    {
-        return $this->extendedApi()->getCurrentCertificate();
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function createLicense(array $payload): array
-    {
-        return $this->extendedApi()->createLicense($payload);
-    }
-
-    /** @return array<string, mixed> */
-    public function getLicenses(): array
-    {
-        return $this->extendedApi()->getLicenses();
-    }
-
-    /** @return array<string, mixed> */
-    public function getLicense(string $id): array
-    {
-        return $this->extendedApi()->getLicense($id);
-    }
-
-    /** @return array<string, mixed> */
-    public function getLicenseDevices(string $id): array
-    {
-        return $this->extendedApi()->getLicenseDevices($id);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function enableLicense(string $id, array $payload = []): array
-    {
-        return $this->extendedApi()->enableLicense($id, $payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function disableLicense(string $id, array $payload = []): array
-    {
-        return $this->extendedApi()->disableLicense($id, $payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function revokeLicense(string $id, array $payload = []): array
-    {
-        return $this->extendedApi()->revokeLicense($id, $payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function activateLicense(array $payload): array
-    {
-        return $this->extendedApi()->activateLicense($payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function refreshLicense(array $payload): array
-    {
-        return $this->extendedApi()->refreshLicense($payload);
-    }
-
     /**
      * @param array<string, mixed> $payload
      * @return list<array<string, mixed>>
@@ -275,15 +202,6 @@ final class Service
     public function requestNumerationsViaRabbitMq(array $payload): array
     {
         return $this->extendedApi()->requestNumerationsViaRabbitMq($payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function syncDocument(array $payload): array
-    {
-        return $this->extendedApi()->syncDocument($payload);
     }
 
     /**
