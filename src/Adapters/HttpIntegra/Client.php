@@ -167,7 +167,7 @@ final class Client implements ExtendedIntegraDteApiInterface
     /** @return array<string, mixed> */
     public function createPurchase(CreatePurchaseRequest $request): array
     {
-        return $this->doJson('POST', '/api/v1/purchases', $request->toArray(), [], $request->idempotencyKey);
+        return $this->doJson('POST', '/api/v1/purchase-acknowledgments', $request->toArray(), [], $request->idempotencyKey);
     }
 
     /**
@@ -209,7 +209,7 @@ final class Client implements ExtendedIntegraDteApiInterface
      */
     public function requestNumbers(array $payload): array
     {
-        return $this->doJson('POST', '/v1/numbers/request', $payload);
+        return $this->doJson('POST', '/api/v1/numerations/request', $payload);
     }
 
     /**
