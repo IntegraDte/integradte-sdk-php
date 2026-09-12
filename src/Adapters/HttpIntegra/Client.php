@@ -7,16 +7,23 @@ namespace IntegraDte\Adapters\HttpIntegra;
 use IntegraDte\Domain\CreateBusinessRequest;
 use IntegraDte\Domain\CreateCessionRequest;
 use IntegraDte\Domain\CreateDocumentRequest;
+use IntegraDte\Domain\CreateFirstBusinessRequest;
 use IntegraDte\Domain\CreatePurchaseRequest;
 use IntegraDte\Domain\GeneratePdfRequest;
+use IntegraDte\Domain\LoginRequest;
+use IntegraDte\Domain\RequeueCessionRequest;
+use IntegraDte\Domain\RequeuePurchaseRequest;
 use IntegraDte\Domain\UpdateBusinessRequest;
+use IntegraDte\Domain\UpdateDocumentRequest;
+use IntegraDte\Domain\UpdateLowStockConfigRequest;
+use IntegraDte\Domain\UpdateNumerationNextNumberRequest;
 use IntegraDte\Domain\UploadCertificateRequest;
 use IntegraDte\Domain\UploadNumerationRequest;
-use IntegraDte\Ports\ExtendedIntegraDteApiInterface;
+use IntegraDte\Ports\FullIntegraDteApiInterface;
 use InvalidArgumentException;
 use JsonException;
 
-final class Client implements ExtendedIntegraDteApiInterface
+final class Client implements FullIntegraDteApiInterface
 {
     private readonly HttpTransportInterface $transport;
 
@@ -36,7 +43,7 @@ final class Client implements ExtendedIntegraDteApiInterface
     /** @return array<string, mixed> */
     public function createDocument(CreateDocumentRequest $request): array
     {
-        return $this->doJson('POST', '/api/v1/documents', $request->toArray(), [], $request->idempotencyKey);
+        return $this->doJson('POST', '/api/v1/documents', $request->toArray(), [], self::idempotencyKeyOrNew($request->idempotencyKey));
     }
 
     /** @return array<string, mixed> */
@@ -72,7 +79,7 @@ final class Client implements ExtendedIntegraDteApiInterface
     /** @return array<string, mixed> */
     public function createCession(CreateCessionRequest $request): array
     {
-        return $this->doJson('POST', '/api/v1/cessions', $request->toArray(), [], $request->idempotencyKey);
+        return $this->doJson('POST', '/api/v1/cessions', $request->toArray(), [], self::idempotencyKeyOrNew($request->idempotencyKey));
     }
 
     /** @return array<string, mixed> */
@@ -90,7 +97,7 @@ final class Client implements ExtendedIntegraDteApiInterface
     /** @return array<string, mixed> */
     public function createBusiness(CreateBusinessRequest $request): array
     {
-        return $this->doJson('POST', '/api/v1/businesses', $request->toArray(), [], $request->idempotencyKey);
+        return $this->doJson('POST', '/api/v1/businesses', $request->toArray(), [], self::idempotencyKeyOrNew($request->idempotencyKey));
     }
 
     /** @return array<string, mixed> */
@@ -123,13 +130,25 @@ final class Client implements ExtendedIntegraDteApiInterface
     /** @return array<string, mixed> */
     public function updateBusiness(string $id, UpdateBusinessRequest $request): array
     {
-        return $this->doJson('PUT', '/api/v1/businesses/' . rawurlencode($id), $request->toArray(), [], $request->idempotencyKey);
+        return $this->doJson(
+            'PUT',
+            '/api/v1/businesses/' . rawurlencode($id),
+            $request->toArray(),
+            [],
+            self::idempotencyKeyOrNew($request->idempotencyKey)
+        );
     }
 
     /** @return array<string, mixed> */
     public function uploadCertificate(string $businessId, UploadCertificateRequest $request): array
     {
-        return $this->doJson('PUT', '/api/v1/business/' . rawurlencode($businessId) . '/certificate', $request->toArray());
+        return $this->doJson(
+            'PUT',
+            '/api/v1/business/' . rawurlencode($businessId) . '/certificate',
+            $request->toArray(),
+            [],
+            self::idempotencyKeyOrNew($request->idempotencyKey)
+        );
     }
 
     /**
@@ -167,7 +186,13 @@ final class Client implements ExtendedIntegraDteApiInterface
     /** @return array<string, mixed> */
     public function createPurchase(CreatePurchaseRequest $request): array
     {
-        return $this->doJson('POST', '/api/v1/purchase-acknowledgments', $request->toArray(), [], $request->idempotencyKey);
+        return $this->doJson(
+            'POST',
+            '/api/v1/purchase-acknowledgments',
+            $request->toArray(),
+            [],
+            self::idempotencyKeyOrNew($request->idempotencyKey)
+        );
     }
 
     /**
@@ -194,13 +219,18 @@ final class Client implements ExtendedIntegraDteApiInterface
     /** @return array<string, mixed> */
     public function uploadNumeration(UploadNumerationRequest $request): array
     {
-        return $this->doJson('PUT', '/api/v1/numerations', $request->toArray());
+        return $this->doJson('PUT', '/api/v1/numerations', $request->toArray(), [], self::idempotencyKeyOrNew($request->idempotencyKey));
     }
 
-    /** @return array<string, mixed> */
-    public function deleteNumeration(string $id): array
+    /**
+     * `$idempotencyKey` is optional: without one a new UUID v4 is sent, because the route
+     * requires the header.
+     *
+     * @return array<string, mixed>
+     */
+    public function deleteNumeration(string $id, ?string $idempotencyKey = null): array
     {
-        return $this->doJson('DELETE', '/api/v1/numerations/' . rawurlencode($id));
+        return $this->doJson('DELETE', '/api/v1/numerations/' . rawurlencode($id), null, [], self::idempotencyKeyOrNew($idempotencyKey));
     }
 
     /**
@@ -231,15 +261,239 @@ final class Client implements ExtendedIntegraDteApiInterface
     }
 
     /**
-     * @param array<string, mixed>|null $body
-     * @param array<string, scalar|null> $query
+     * GET /api/v1/health, without authentication. Returns the raw JSON (`service`,
+     * `started_at`, `uptime_seconds`, ...), not the `{success, message, data}` envelope.
+     *
      * @return array<string, mixed>
      */
-    private function doJson(string $method, string $route, ?array $body = null, array $query = [], ?string $idempotencyKey = null): array
+    public function getHealth(): array
     {
+        return $this->doJson('GET', '/api/v1/health', null, [], null, []);
+    }
+
+    /**
+     * POST /api/v1/auth/login, without x-api-key. `data.xUserKey` is the `x-user-key`
+     * for createFirstBusiness.
+     *
+     * @return array<string, mixed>
+     */
+    public function login(LoginRequest $request): array
+    {
+        return $this->doJson('POST', '/api/v1/auth/login', $request->toArray(), [], null, []);
+    }
+
+    /**
+     * POST /api/v1/onboarding/businesses, authenticated with the `x-user-key` from login
+     * (not the configured x-api-key). `data.apiToken.xApiKey` is the x-api-key to use from
+     * then on.
+     *
+     * @return array<string, mixed>
+     */
+    public function createFirstBusiness(CreateFirstBusinessRequest $request, string $userKey): array
+    {
+        if (trim($userKey) === '') {
+            throw new InvalidArgumentException('integradte: user key is required');
+        }
+
+        return $this->doJson('POST', '/api/v1/onboarding/businesses', $request->toArray(), [], null, ['x-user-key' => $userKey]);
+    }
+
+    /**
+     * The API never stores this route's response for replay: reusing a key returns 500,
+     * so use a new key per attempt (the default when none is given).
+     *
+     * @return array<string, mixed>
+     */
+    public function updateDocument(string $id, UpdateDocumentRequest $request): array
+    {
+        return $this->doJson(
+            'PUT',
+            '/api/v1/documents/' . rawurlencode($id),
+            $request->toArray(),
+            [],
+            self::idempotencyKeyOrNew($request->idempotencyKey)
+        );
+    }
+
+    /**
+     * `$numerationId` is the CAF range id (`ranges[].id` from listNumerationRanges).
+     *
+     * @return array<string, mixed>
+     */
+    public function updateNumerationNextNumber(string $numerationId, UpdateNumerationNextNumberRequest $request): array
+    {
+        return $this->doJson(
+            'PATCH',
+            '/api/v1/numerations/' . rawurlencode($numerationId) . '/next-number',
+            $request->toArray(),
+            [],
+            self::idempotencyKeyOrNew($request->idempotencyKey)
+        );
+    }
+
+    /** @return array<string, mixed> */
+    public function updateLowStockConfig(UpdateLowStockConfigRequest $request): array
+    {
+        return $this->doJson(
+            'PATCH',
+            '/api/v1/numerations/low-stock',
+            $request->toArray(),
+            [],
+            self::idempotencyKeyOrNew($request->idempotencyKey)
+        );
+    }
+
+    /**
+     * Filters: `code_sii`. The order of `data.items` is not guaranteed.
+     *
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function listNumerationRanges(array $filters = []): array
+    {
+        return $this->doJson('GET', '/api/v1/numerations/ranges', null, $filters);
+    }
+
+    /** @return array<string, mixed> */
+    public function requeuePurchase(RequeuePurchaseRequest $request): array
+    {
+        return $this->doJson('POST', '/api/v1/purchase-acknowledgments/requeue', $request->toArray(), [], $request->idempotencyKey);
+    }
+
+    /**
+     * Filters: `page`, `limit`, `status`, `pricing_key`, `from_date`, `to_date`.
+     *
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function listBillingCharges(array $filters = []): array
+    {
+        return $this->doJson('GET', '/api/v1/billing/charges', null, $filters);
+    }
+
+    /**
+     * `data` is a bare list of active plans.
+     *
+     * @return array<string, mixed>
+     */
+    public function listBillingPlans(): array
+    {
+        return $this->doJson('GET', '/api/v1/billing/plans');
+    }
+
+    /**
+     * Filters: `status`. `data` is a bare list, sorted by period descending.
+     *
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function listBillingInvoices(array $filters = []): array
+    {
+        return $this->doJson('GET', '/api/v1/billing/invoices', null, $filters);
+    }
+
+    /**
+     * `$planId` accepts the plan id or its `code`. Read-only: nothing is charged.
+     *
+     * @return array<string, mixed>
+     */
+    public function previewSubscriptionUpgrade(string $planId): array
+    {
+        return $this->doJson('GET', '/api/v1/billing/subscription/upgrade/preview', null, ['plan_id' => $planId]);
+    }
+
+    /** @return array<string, mixed> */
+    public function getConsumption(): array
+    {
+        return $this->doJson('GET', '/api/v1/consumption');
+    }
+
+    /**
+     * Filters: `page`, `limit`.
+     *
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function listConsumptionOverages(array $filters = []): array
+    {
+        return $this->doJson('GET', '/api/v1/consumption/overages', null, $filters);
+    }
+
+    /**
+     * Filters: `period` (`YYYY-MM`, current UTC month by default). Not paginated.
+     *
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function listConsumptionOperations(array $filters = []): array
+    {
+        return $this->doJson('GET', '/api/v1/consumption/operations', null, $filters);
+    }
+
+    /** @return array<string, mixed> */
+    public function requeueCession(RequeueCessionRequest $request): array
+    {
+        return $this->doJson('POST', '/api/v1/cessions/requeue', $request->toArray(), [], $request->idempotencyKey);
+    }
+
+    /**
+     * Filters: `page`, `limit`, `document_id`. The list comes under `data.cessions`.
+     *
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function listCessions(array $filters = []): array
+    {
+        return $this->doJson('GET', '/api/v1/cessions', null, $filters);
+    }
+
+    /** @return array<string, mixed> */
+    public function getCession(string $id): array
+    {
+        return $this->doJson('GET', '/api/v1/cessions/' . rawurlencode($id));
+    }
+
+    /**
+     * Returns a random UUID v4, the format the API accepts in `idempotency-key`.
+     */
+    public static function generateIdempotencyKey(): string
+    {
+        $bytes = random_bytes(16);
+        $bytes[6] = chr((ord($bytes[6]) & 0x0f) | 0x40);
+        $bytes[8] = chr((ord($bytes[8]) & 0x3f) | 0x80);
+
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($bytes), 4));
+    }
+
+    /**
+     * Routes behind the API's IdempotencyMiddleware reject requests without
+     * `idempotency-key`, so they always get one: the caller's, or a new UUID v4.
+     */
+    private static function idempotencyKeyOrNew(?string $idempotencyKey): string
+    {
+        if ($idempotencyKey !== null && trim($idempotencyKey) !== '') {
+            return $idempotencyKey;
+        }
+
+        return self::generateIdempotencyKey();
+    }
+
+    /**
+     * @param array<string, mixed>|null $body
+     * @param array<string, scalar|null> $query
+     * @param array<string, string>|null $authHeaders null sends the configured x-api-key; [] sends no credentials
+     * @return array<string, mixed>
+     */
+    private function doJson(
+        string $method,
+        string $route,
+        ?array $body = null,
+        array $query = [],
+        ?string $idempotencyKey = null,
+        ?array $authHeaders = null
+    ): array {
         $url = $this->buildUrl($route, $query);
-        $headers = [
-            'x-api-key' => $this->config->apiKey,
+        $headers = ($authHeaders ?? ['x-api-key' => $this->config->apiKey]) + [
             'Accept' => 'application/json',
             'User-Agent' => $this->config->userAgent,
         ];

@@ -12,7 +12,8 @@ final class UploadNumerationRequest
         public int $endNumber,
         public string $cafBase64,
         public string $creationDate,
-        public string $dueDate
+        public string $dueDate,
+        public ?string $idempotencyKey = null
     ) {
     }
 
