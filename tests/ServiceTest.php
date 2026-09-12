@@ -5,16 +5,29 @@ declare(strict_types=1);
 namespace IntegraDte\Tests;
 
 use BadMethodCallException;
+use IntegraDte\Adapters\HttpIntegra\Client;
+use IntegraDte\Adapters\HttpIntegra\Config;
+use IntegraDte\Adapters\HttpIntegra\HttpResponse;
+use IntegraDte\Adapters\HttpIntegra\HttpTransportInterface;
 use IntegraDte\Application\Service;
 use IntegraDte\Domain\CreateBusinessRequest;
 use IntegraDte\Domain\CreateCessionRequest;
 use IntegraDte\Domain\CreateDocumentRequest;
+use IntegraDte\Domain\CreateFirstBusinessRequest;
 use IntegraDte\Domain\CreatePurchaseRequest;
 use IntegraDte\Domain\GeneratePdfRequest;
+use IntegraDte\Domain\LoginRequest;
+use IntegraDte\Domain\LowStockConfigItem;
+use IntegraDte\Domain\RequeueCessionRequest;
+use IntegraDte\Domain\RequeuePurchaseRequest;
 use IntegraDte\Domain\UpdateBusinessRequest;
+use IntegraDte\Domain\UpdateDocumentRequest;
+use IntegraDte\Domain\UpdateLowStockConfigRequest;
+use IntegraDte\Domain\UpdateNumerationNextNumberRequest;
 use IntegraDte\Domain\UploadCertificateRequest;
 use IntegraDte\Domain\UploadNumerationRequest;
 use IntegraDte\Ports\ExtendedIntegraDteApiInterface;
+use IntegraDte\Ports\FullIntegraDteApiInterface;
 use IntegraDte\Ports\IntegraDteApiInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -191,6 +204,101 @@ final class ServiceTest extends TestCase
             'arguments' => [['document_id' => 'doc-1']],
             'response' => ['queued' => true, 'status_only' => true],
         ];
+    }
+
+    #[DataProvider('fullOperationProvider')]
+    public function testFullApiOperationsDispatchExactMethodAndArguments(string $method, array $arguments): void
+    {
+        $response = ['success' => true, 'operation' => $method];
+        $api = $this->createMock(FullIntegraDteApiInterface::class);
+        $api->expects(self::once())->method($method)->with(...$arguments)->willReturn($response);
+
+        self::assertSame($response, (new Service($api))->{$method}(...$arguments));
+    }
+
+    #[DataProvider('fullOperationProvider')]
+    public function testFullApiOperationsFailClearlyForExtendedOnlyAdapters(string $method, array $arguments): void
+    {
+        $service = new Service($this->createExtendedApiSpy());
+
+        $this->expectException(BadMethodCallException::class);
+        $this->expectExceptionMessage('does not support the requested extended operation');
+
+        $service->{$method}(...$arguments);
+    }
+
+    public static function fullOperationProvider(): iterable
+    {
+        yield 'getHealth' => ['method' => 'getHealth', 'arguments' => []];
+        yield 'login' => ['method' => 'login', 'arguments' => [new LoginRequest('a@b.cl', 'secret')]];
+        yield 'createFirstBusiness' => [
+            'method' => 'createFirstBusiness',
+            'arguments' => [
+                new CreateFirstBusinessRequest(
+                    'Empresa SpA',
+                    '76000000-0',
+                    'Software',
+                    'Av. Apoquindo 3000',
+                    'Las Condes',
+                    'dte@empresa.cl',
+                    'contacto@empresa.cl',
+                    '12345678-9',
+                    'Ana Perez',
+                    '0',
+                    '2014-08-22',
+                    '0',
+                    '2014-08-22',
+                    region: 'Metropolitana'
+                ),
+                'user-key-1',
+            ],
+        ];
+        yield 'updateDocument' => ['method' => 'updateDocument', 'arguments' => ['doc-1', new UpdateDocumentRequest(dataDte: '{}')]];
+        yield 'updateNumerationNextNumber' => [
+            'method' => 'updateNumerationNextNumber',
+            'arguments' => ['range-1', new UpdateNumerationNextNumberRequest(10)],
+        ];
+        yield 'updateLowStockConfig' => [
+            'method' => 'updateLowStockConfig',
+            'arguments' => [new UpdateLowStockConfigRequest([new LowStockConfigItem('33', 5, 100)])],
+        ];
+        yield 'listNumerationRanges' => ['method' => 'listNumerationRanges', 'arguments' => [['code_sii' => '33']]];
+        yield 'requeuePurchase' => ['method' => 'requeuePurchase', 'arguments' => [new RequeuePurchaseRequest('pur-1')]];
+        yield 'listBillingCharges' => ['method' => 'listBillingCharges', 'arguments' => [['status' => 'charged']]];
+        yield 'listBillingPlans' => ['method' => 'listBillingPlans', 'arguments' => []];
+        yield 'listBillingInvoices' => ['method' => 'listBillingInvoices', 'arguments' => [['status' => 'open']]];
+        yield 'previewSubscriptionUpgrade' => ['method' => 'previewSubscriptionUpgrade', 'arguments' => ['pro']];
+        yield 'getConsumption' => ['method' => 'getConsumption', 'arguments' => []];
+        yield 'listConsumptionOverages' => ['method' => 'listConsumptionOverages', 'arguments' => [['page' => 1]]];
+        yield 'listConsumptionOperations' => ['method' => 'listConsumptionOperations', 'arguments' => [['period' => '2026-09']]];
+        yield 'requeueCession' => ['method' => 'requeueCession', 'arguments' => [new RequeueCessionRequest('ces-1')]];
+        yield 'listCessions' => ['method' => 'listCessions', 'arguments' => [['document_id' => 'doc-1']]];
+        yield 'getCession' => ['method' => 'getCession', 'arguments' => ['ces-1']];
+    }
+
+    public function testDeleteNumerationForwardsCallerIdempotencyKeyToClient(): void
+    {
+        $transport = new class () implements HttpTransportInterface {
+            /** @var list<array<string, string>> */
+            public array $headers = [];
+
+            public function send(string $method, string $url, array $headers, ?string $body): HttpResponse
+            {
+                $this->headers[] = $headers;
+
+                return new HttpResponse(200, '{"success":true}');
+            }
+        };
+        $service = new Service(new Client(new Config(apiKey: 'key', transport: $transport)));
+
+        $service->deleteNumeration('num-1', 'caller-key-1');
+        $service->deleteNumeration('num-1');
+
+        self::assertSame('caller-key-1', $transport->headers[0]['idempotency-key'] ?? null);
+        self::assertMatchesRegularExpression(
+            '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/',
+            $transport->headers[1]['idempotency-key'] ?? ''
+        );
     }
 
     private function createBaseApiStub(): IntegraDteApiInterface

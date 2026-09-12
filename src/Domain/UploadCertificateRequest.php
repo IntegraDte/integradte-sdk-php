@@ -9,7 +9,8 @@ final class UploadCertificateRequest
     public function __construct(
         public string $certificate,
         public string $password,
-        public string $expiredDate
+        public string $expiredDate,
+        public ?string $idempotencyKey = null
     ) {
     }
 

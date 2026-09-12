@@ -7,12 +7,20 @@ namespace IntegraDte\Application;
 use IntegraDte\Domain\CreateBusinessRequest;
 use IntegraDte\Domain\CreateCessionRequest;
 use IntegraDte\Domain\CreateDocumentRequest;
+use IntegraDte\Domain\CreateFirstBusinessRequest;
 use IntegraDte\Domain\CreatePurchaseRequest;
 use IntegraDte\Domain\GeneratePdfRequest;
+use IntegraDte\Domain\LoginRequest;
+use IntegraDte\Domain\RequeueCessionRequest;
+use IntegraDte\Domain\RequeuePurchaseRequest;
 use IntegraDte\Domain\UpdateBusinessRequest;
+use IntegraDte\Domain\UpdateDocumentRequest;
+use IntegraDte\Domain\UpdateLowStockConfigRequest;
+use IntegraDte\Domain\UpdateNumerationNextNumberRequest;
 use IntegraDte\Domain\UploadCertificateRequest;
 use IntegraDte\Domain\UploadNumerationRequest;
 use IntegraDte\Ports\ExtendedIntegraDteApiInterface;
+use IntegraDte\Ports\FullIntegraDteApiInterface;
 use IntegraDte\Ports\IntegraDteApiInterface;
 use BadMethodCallException;
 
@@ -180,10 +188,19 @@ final class Service
         return $this->api->uploadNumeration($request);
     }
 
-    /** @return array<string, mixed> */
-    public function deleteNumeration(string $id): array
+    /**
+     * `$idempotencyKey` is forwarded to the adapter only when given. The HTTP Client
+     * sends a new UUID v4 when it is omitted.
+     *
+     * @return array<string, mixed>
+     */
+    public function deleteNumeration(string $id, ?string $idempotencyKey = null): array
     {
-        return $this->api->deleteNumeration($id);
+        if ($idempotencyKey === null) {
+            return $this->api->deleteNumeration($id);
+        }
+
+        return $this->api->deleteNumeration($id, $idempotencyKey);
     }
 
     /**
@@ -213,9 +230,144 @@ final class Service
         return $this->extendedApi()->requeueDocumentStatus($payload);
     }
 
+    /** @return array<string, mixed> */
+    public function getHealth(): array
+    {
+        return $this->fullApi()->getHealth();
+    }
+
+    /** @return array<string, mixed> */
+    public function login(LoginRequest $request): array
+    {
+        return $this->fullApi()->login($request);
+    }
+
+    /** @return array<string, mixed> */
+    public function createFirstBusiness(CreateFirstBusinessRequest $request, string $userKey): array
+    {
+        return $this->fullApi()->createFirstBusiness($request, $userKey);
+    }
+
+    /** @return array<string, mixed> */
+    public function updateDocument(string $id, UpdateDocumentRequest $request): array
+    {
+        return $this->fullApi()->updateDocument($id, $request);
+    }
+
+    /** @return array<string, mixed> */
+    public function updateNumerationNextNumber(string $numerationId, UpdateNumerationNextNumberRequest $request): array
+    {
+        return $this->fullApi()->updateNumerationNextNumber($numerationId, $request);
+    }
+
+    /** @return array<string, mixed> */
+    public function updateLowStockConfig(UpdateLowStockConfigRequest $request): array
+    {
+        return $this->fullApi()->updateLowStockConfig($request);
+    }
+
+    /**
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function listNumerationRanges(array $filters = []): array
+    {
+        return $this->fullApi()->listNumerationRanges($filters);
+    }
+
+    /** @return array<string, mixed> */
+    public function requeuePurchase(RequeuePurchaseRequest $request): array
+    {
+        return $this->fullApi()->requeuePurchase($request);
+    }
+
+    /**
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function listBillingCharges(array $filters = []): array
+    {
+        return $this->fullApi()->listBillingCharges($filters);
+    }
+
+    /** @return array<string, mixed> */
+    public function listBillingPlans(): array
+    {
+        return $this->fullApi()->listBillingPlans();
+    }
+
+    /**
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function listBillingInvoices(array $filters = []): array
+    {
+        return $this->fullApi()->listBillingInvoices($filters);
+    }
+
+    /** @return array<string, mixed> */
+    public function previewSubscriptionUpgrade(string $planId): array
+    {
+        return $this->fullApi()->previewSubscriptionUpgrade($planId);
+    }
+
+    /** @return array<string, mixed> */
+    public function getConsumption(): array
+    {
+        return $this->fullApi()->getConsumption();
+    }
+
+    /**
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function listConsumptionOverages(array $filters = []): array
+    {
+        return $this->fullApi()->listConsumptionOverages($filters);
+    }
+
+    /**
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function listConsumptionOperations(array $filters = []): array
+    {
+        return $this->fullApi()->listConsumptionOperations($filters);
+    }
+
+    /** @return array<string, mixed> */
+    public function requeueCession(RequeueCessionRequest $request): array
+    {
+        return $this->fullApi()->requeueCession($request);
+    }
+
+    /**
+     * @param array<string, scalar|null> $filters
+     * @return array<string, mixed>
+     */
+    public function listCessions(array $filters = []): array
+    {
+        return $this->fullApi()->listCessions($filters);
+    }
+
+    /** @return array<string, mixed> */
+    public function getCession(string $id): array
+    {
+        return $this->fullApi()->getCession($id);
+    }
+
     private function extendedApi(): ExtendedIntegraDteApiInterface
     {
         if ($this->api instanceof ExtendedIntegraDteApiInterface) {
+            return $this->api;
+        }
+
+        throw new BadMethodCallException('integradte: this API adapter does not support the requested extended operation');
+    }
+
+    private function fullApi(): FullIntegraDteApiInterface
+    {
+        if ($this->api instanceof FullIntegraDteApiInterface) {
             return $this->api;
         }
 
