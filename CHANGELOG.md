@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.3.0...integradte-sdk-php-v0.3.1) (2026-09-12)
+
+
+### Features
+
+* **api:** cover the full public API and always send idempotency-key ([c04831d](https://github.com/IntegraDte/integradte-sdk-php/commit/c04831ddb72de642cbf0b4775bf7775a3ab36dab))
+* **api:** cover the full public API and always send idempotency-key ([55226cd](https://github.com/IntegraDte/integradte-sdk-php/commit/55226cdc5ee4ecebfb2e5b2cbe13206ae6d22b12))
+
 ## [0.3.0](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.2.1...integradte-sdk-php-v0.3.0) (2026-09-12)
 
 
