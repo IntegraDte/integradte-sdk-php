@@ -100,7 +100,7 @@ final class ServiceTest extends TestCase
     {
         yield 'getDocuments' => ['method' => 'getDocuments', 'arguments' => [['status' => 'accepted']]];
         yield 'requestNumbers' => ['method' => 'requestNumbers', 'arguments' => [['document_type' => 33, 'quantity' => 4]]];
-        yield 'requeueOfflineDocument' => ['method' => 'requeueOfflineDocument', 'arguments' => [['document_id' => 'doc-offline-1']]];
+        yield 'requeueDocumentStatus' => ['method' => 'requeueDocumentStatus', 'arguments' => [['document_id' => 'doc-1']]];
     }
 
     #[DataProvider('extendedOperationProvider')]
@@ -180,27 +180,15 @@ final class ServiceTest extends TestCase
             'response' => [['document_type' => 33, 'start' => 100, 'end' => 103]],
         ];
 
-        yield 'requestNumerationsViaRabbitMq' => [
-            'method' => 'requestNumerationsViaRabbitMq',
-            'arguments' => [['code_sii' => '33', 'quantity' => 120]],
-            'response' => ['queued' => true],
-        ];
-
         yield 'requeueDocument' => [
             'method' => 'requeueDocument',
             'arguments' => [['document_id' => 'doc-1']],
             'response' => ['queued' => true],
         ];
 
-        yield 'requeueOfflineDocument' => [
-            'method' => 'requeueOfflineDocument',
-            'arguments' => [['document_id' => 'doc-offline-1']],
-            'response' => ['queued' => true, 'offline' => true],
-        ];
-
         yield 'requeueDocumentStatus' => [
             'method' => 'requeueDocumentStatus',
-            'arguments' => [['document_id' => 'doc-offline-1']],
+            'arguments' => [['document_id' => 'doc-1']],
             'response' => ['queued' => true, 'status_only' => true],
         ];
     }
@@ -518,17 +506,7 @@ final class ServiceTest extends TestCase
                 return $this->record(__FUNCTION__, [$payload]);
             }
 
-            public function requestNumerationsViaRabbitMq(array $payload): array
-            {
-                return $this->record(__FUNCTION__, [$payload]);
-            }
-
             public function requeueDocument(array $payload): array
-            {
-                return $this->record(__FUNCTION__, [$payload]);
-            }
-
-            public function requeueOfflineDocument(array $payload): array
             {
                 return $this->record(__FUNCTION__, [$payload]);
             }

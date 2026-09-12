@@ -199,27 +199,9 @@ final class Service
      * @param array<string, mixed> $payload
      * @return array<string, mixed>
      */
-    public function requestNumerationsViaRabbitMq(array $payload): array
-    {
-        return $this->extendedApi()->requestNumerationsViaRabbitMq($payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
     public function requeueDocument(array $payload): array
     {
         return $this->extendedApi()->requeueDocument($payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function requeueOfflineDocument(array $payload): array
-    {
-        return $this->extendedApi()->requeueOfflineDocument($payload);
     }
 
     /**
