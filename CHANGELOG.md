@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.2.1...integradte-sdk-php-v0.3.0) (2026-09-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **api:** removed Client/Service/ExtendedIntegraDteApiInterface methods requeueOfflineDocument() and requestNumerationsViaRabbitMq(). Use requeueDocument() to requeue documents and requestNumbers() to request folios.
+
+### Features
+
+* **api:** drop offline document requeue and RabbitMQ numeration request ([13035a6](https://github.com/IntegraDte/integradte-sdk-php/commit/13035a65d3f53b9068cc2d4a4ac5b230e6283b27))
+
 ## [0.2.1](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.2.0...integradte-sdk-php-v0.2.1) (2026-09-11)
 
 
