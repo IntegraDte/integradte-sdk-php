@@ -152,9 +152,7 @@ if (!$info['data']['has_valid_certificate']) {
 - `uploadNumeration`
 - `deleteNumeration`
 - `requestNumbers`
-- `requestNumerationsViaRabbitMq`
 - `requeueDocument`
-- `requeueOfflineDocument`
 - `requeueDocumentStatus`
 
 ## Workflows incluidos

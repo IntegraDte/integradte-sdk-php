@@ -58,19 +58,7 @@ interface ExtendedIntegraDteApiInterface extends IntegraDteApiInterface
      * @param array<string, mixed> $payload
      * @return array<string, mixed>
      */
-    public function requestNumerationsViaRabbitMq(array $payload): array;
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
     public function requeueDocument(array $payload): array;
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function requeueOfflineDocument(array $payload): array;
 
     /**
      * @param array<string, mixed> $payload

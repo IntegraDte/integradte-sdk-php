@@ -216,27 +216,9 @@ final class Client implements ExtendedIntegraDteApiInterface
      * @param array<string, mixed> $payload
      * @return array<string, mixed>
      */
-    public function requestNumerationsViaRabbitMq(array $payload): array
-    {
-        return $this->doJson('POST', '/api/v1/numerations/request-rabbitmq', $payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
     public function requeueDocument(array $payload): array
     {
         return $this->doJson('POST', '/api/v1/documents/requeue', $payload);
-    }
-
-    /**
-     * @param array<string, mixed> $payload
-     * @return array<string, mixed>
-     */
-    public function requeueOfflineDocument(array $payload): array
-    {
-        return $this->doJson('POST', '/api/v1/documents/requeue/offline', $payload);
     }
 
     /**

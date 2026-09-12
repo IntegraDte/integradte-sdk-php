@@ -118,25 +118,14 @@ final class ClientTest extends TestCase
             'quantity' => 4,
         ]);
 
-        $client->requestNumerationsViaRabbitMq(['code_sii' => '33', 'quantity' => 120]);
-        $this->assertRecordedRequest($transport->history[1], 'POST', '/api/v1/numerations/request-rabbitmq', [
-            'code_sii' => '33',
-            'quantity' => 120,
-        ]);
-
         $client->requeueDocument(['document_id' => 'doc-1']);
-        $this->assertRecordedRequest($transport->history[2], 'POST', '/api/v1/documents/requeue', [
+        $this->assertRecordedRequest($transport->history[1], 'POST', '/api/v1/documents/requeue', [
             'document_id' => 'doc-1',
         ]);
 
-        $client->requeueOfflineDocument(['document_id' => 'doc-offline-1']);
-        $this->assertRecordedRequest($transport->history[3], 'POST', '/api/v1/documents/requeue/offline', [
-            'document_id' => 'doc-offline-1',
-        ]);
-
-        $client->requeueDocumentStatus(['document_id' => 'doc-offline-1']);
-        $this->assertRecordedRequest($transport->history[4], 'POST', '/api/v1/documents/requeue/status', [
-            'document_id' => 'doc-offline-1',
+        $client->requeueDocumentStatus(['document_id' => 'doc-1']);
+        $this->assertRecordedRequest($transport->history[2], 'POST', '/api/v1/documents/requeue/status', [
+            'document_id' => 'doc-1',
         ]);
     }
 
