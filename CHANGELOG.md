@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.2](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.3.1...integradte-sdk-php-v0.3.2) (2026-09-12)
+
+
+### Features
+
+* **client:** build a client without an API key for onboarding ([87935c7](https://github.com/IntegraDte/integradte-sdk-php/commit/87935c72b17ba8477fea63cff204cf686a8a922f))
+* **client:** build a client without an API key for onboarding ([e54f331](https://github.com/IntegraDte/integradte-sdk-php/commit/e54f3314b4f3d752b0ba33e36d4f0b67dd6d8b30))
+
 ## [0.3.1](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.3.0...integradte-sdk-php-v0.3.1) (2026-09-12)
 
 
