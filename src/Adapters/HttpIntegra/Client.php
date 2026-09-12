@@ -20,24 +20,59 @@ use IntegraDte\Domain\UpdateNumerationNextNumberRequest;
 use IntegraDte\Domain\UploadCertificateRequest;
 use IntegraDte\Domain\UploadNumerationRequest;
 use IntegraDte\Ports\FullIntegraDteApiInterface;
+use BadMethodCallException;
 use InvalidArgumentException;
 use JsonException;
+use ReflectionClass;
 
 final class Client implements FullIntegraDteApiInterface
 {
+    private readonly Config $config;
     private readonly HttpTransportInterface $transport;
+    private readonly bool $hasApiKey;
 
-    public function __construct(private readonly Config $config)
+    public function __construct(Config $config)
     {
-        if (trim($this->config->apiKey) === '') {
+        if (trim($config->apiKey) === '') {
             throw new InvalidArgumentException('integradte: API key is required');
         }
 
-        if (filter_var($this->config->baseUrl, FILTER_VALIDATE_URL) === false) {
+        $this->initialize($config, true);
+    }
+
+    /**
+     * Builds a client for onboarding, before the user has an x-api-key: only getHealth(),
+     * login() and createFirstBusiness() work, and x-api-key is never sent. Any other method
+     * throws BadMethodCallException before making a request.
+     *
+     * `$config` (optional) sets baseUrl, userAgent, timeout or transport; its apiKey must be
+     * empty, e.g. `new Config(apiKey: '', baseUrl: '...')`.
+     */
+    public static function withoutApiKey(?Config $config = null): self
+    {
+        $config ??= new Config(apiKey: '');
+
+        if (trim($config->apiKey) !== '') {
+            throw new InvalidArgumentException(
+                'integradte: Client::withoutApiKey() expects a Config without API key; use new Client($config) instead'
+            );
+        }
+
+        $client = (new ReflectionClass(self::class))->newInstanceWithoutConstructor();
+        $client->initialize($config, false);
+
+        return $client;
+    }
+
+    private function initialize(Config $config, bool $hasApiKey): void
+    {
+        if (filter_var($config->baseUrl, FILTER_VALIDATE_URL) === false) {
             throw new InvalidArgumentException('integradte: invalid base URL');
         }
 
-        $this->transport = $this->config->transport ?? new CurlTransport($this->config->timeoutSeconds);
+        $this->config = $config;
+        $this->hasApiKey = $hasApiKey;
+        $this->transport = $config->transport ?? new CurlTransport($config->timeoutSeconds);
     }
 
     /** @return array<string, mixed> */
@@ -492,8 +527,22 @@ final class Client implements FullIntegraDteApiInterface
         ?string $idempotencyKey = null,
         ?array $authHeaders = null
     ): array {
+        if ($authHeaders === null) {
+            if (!$this->hasApiKey) {
+                throw new BadMethodCallException(sprintf(
+                    'integradte: %s %s needs x-api-key, but this client was built with Client::withoutApiKey(), '
+                    . 'which only supports getHealth(), login() and createFirstBusiness(); '
+                    . 'use new Client(new Config(apiKey: ...))',
+                    $method,
+                    $route
+                ));
+            }
+
+            $authHeaders = ['x-api-key' => $this->config->apiKey];
+        }
+
         $url = $this->buildUrl($route, $query);
-        $headers = ($authHeaders ?? ['x-api-key' => $this->config->apiKey]) + [
+        $headers = $authHeaders + [
             'Accept' => 'application/json',
             'User-Agent' => $this->config->userAgent,
         ];

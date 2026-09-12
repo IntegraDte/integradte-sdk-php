@@ -9,6 +9,7 @@ use IntegraDte\Adapters\HttpIntegra\Client;
 use IntegraDte\Adapters\HttpIntegra\Config;
 use IntegraDte\Adapters\HttpIntegra\HttpResponse;
 use IntegraDte\Adapters\HttpIntegra\HttpTransportInterface;
+use BadMethodCallException;
 use Closure;
 use IntegraDte\Domain\CreateBusinessRequest;
 use IntegraDte\Domain\CreateCessionRequest;
@@ -596,7 +597,110 @@ final class ClientTest extends TestCase
         self::assertCount(50, array_unique($keys));
     }
 
-    private const UUID_V4 = '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/';
+    public function testKeylessClientRunsOnboardingWithoutApiKey(): void
+    {
+        $transport = new RecordingTransport();
+        $client = Client::withoutApiKey(new Config(apiKey: '', baseUrl: 'https://api.integradte.cl', transport: $transport));
+
+        $client->getHealth();
+        $client->login(new LoginRequest(email: 'a@b.cl', password: 'secret'));
+        $client->createFirstBusiness(self::firstBusinessRequest(), 'user-key-1');
+
+        $this->assertRecordedRequest($transport->history[0], 'GET', '/api/v1/health');
+        $this->assertRecordedRequest($transport->history[1], 'POST', '/api/v1/auth/login', [
+            'email' => 'a@b.cl',
+            'password' => 'secret',
+        ]);
+        self::assertSame('POST', $transport->history[2]['method']);
+        self::assertSame('/api/v1/onboarding/businesses', parse_url($transport->history[2]['url'], PHP_URL_PATH));
+        self::assertSame('user-key-1', $transport->history[2]['headers']['x-user-key'] ?? null);
+
+        foreach ($transport->history as $record) {
+            self::assertArrayNotHasKey('x-api-key', $record['headers']);
+        }
+    }
+
+    #[DataProvider('apiKeyRouteProvider')]
+    public function testKeylessClientRejectsApiKeyRoutesBeforeSending(Closure $call): void
+    {
+        $transport = new RecordingTransport();
+        $client = Client::withoutApiKey(new Config(apiKey: '', transport: $transport));
+
+        try {
+            $call($client);
+            self::fail('expected BadMethodCallException');
+        } catch (BadMethodCallException $e) {
+            self::assertStringContainsString('Client::withoutApiKey()', $e->getMessage());
+        }
+
+        self::assertSame([], $transport->history);
+    }
+
+    /**
+     * One method per port, verb and route family. The check lives in doJson, which every
+     * x-api-key route goes through.
+     *
+     * @return iterable<string, array{0: Closure(Client): mixed}>
+     */
+    public static function apiKeyRouteProvider(): iterable
+    {
+        yield 'getMe' => [static fn (Client $c) => $c->getMe()];
+        yield 'getDocument' => [static fn (Client $c) => $c->getDocument('doc-1')];
+        yield 'createDocument' => [static fn (Client $c) => $c->createDocument(new CreateDocumentRequest('33', '{}'))];
+        yield 'generatePdf' => [static fn (Client $c) => $c->generatePdf(new GeneratePdfRequest('doc-1'), true)];
+        yield 'deleteNumeration' => [static fn (Client $c) => $c->deleteNumeration('num-1')];
+        yield 'getDocuments' => [static fn (Client $c) => $c->getDocuments(['page' => 1])];
+        yield 'requestNumbers' => [static fn (Client $c) => $c->requestNumbers(['document_type' => 33, 'quantity' => 4])];
+        yield 'enableCertificationMode' => [static fn (Client $c) => $c->enableCertificationMode()];
+        yield 'updateDocument' => [static fn (Client $c) => $c->updateDocument('doc-1', new UpdateDocumentRequest(dataDte: '{}'))];
+        yield 'updateLowStockConfig' => [
+            static fn (Client $c) => $c->updateLowStockConfig(new UpdateLowStockConfigRequest([new LowStockConfigItem('33', 5, 100)])),
+        ];
+        yield 'listNumerationRanges' => [static fn (Client $c) => $c->listNumerationRanges()];
+        yield 'listBillingPlans' => [static fn (Client $c) => $c->listBillingPlans()];
+        yield 'getConsumption' => [static fn (Client $c) => $c->getConsumption()];
+        yield 'requeueCession' => [static fn (Client $c) => $c->requeueCession(new RequeueCessionRequest('ces-1'))];
+        yield 'getCession' => [static fn (Client $c) => $c->getCession('ces-1')];
+    }
+
+    #[DataProvider('emptyApiKeyProvider')]
+    public function testConstructorStillRejectsEmptyApiKey(string $apiKey): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('API key is required');
+
+        new Client(new Config(apiKey: $apiKey, transport: new RecordingTransport()));
+    }
+
+    /** @return iterable<string, array{0: string}> */
+    public static function emptyApiKeyProvider(): iterable
+    {
+        yield 'empty' => [''];
+        yield 'blank' => ['   '];
+    }
+
+    public function testWithoutApiKeyRejectsConfigThatHasApiKey(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('use new Client($config) instead');
+
+        Client::withoutApiKey(new Config(apiKey: 'key'));
+    }
+
+    public function testWithoutApiKeyValidatesBaseUrl(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('invalid base URL');
+
+        Client::withoutApiKey(new Config(apiKey: '', baseUrl: 'not a url'));
+    }
+
+    public function testWithoutApiKeyWorksWithDefaultConfig(): void
+    {
+        self::assertInstanceOf(Client::class, Client::withoutApiKey());
+    }
+
+    private const UUID_V4 ='/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/';
 
     private static function firstBusinessRequest(): CreateFirstBusinessRequest
     {
