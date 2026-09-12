@@ -301,6 +301,34 @@ final class ServiceTest extends TestCase
         );
     }
 
+    public function testServiceCanBeBuiltFromKeylessClient(): void
+    {
+        $transport = new class () implements HttpTransportInterface {
+            /** @var list<array<string, string>> */
+            public array $headers = [];
+
+            public function send(string $method, string $url, array $headers, ?string $body): HttpResponse
+            {
+                $this->headers[] = $headers;
+
+                return new HttpResponse(200, '{"success":true,"message":"login successful","data":{"xUserKey":"uk-1"}}');
+            }
+        };
+        $service = new Service(Client::withoutApiKey(new Config(apiKey: '', transport: $transport)));
+
+        self::assertSame('uk-1', $service->login(new LoginRequest('a@b.cl', 'secret'))['data']['xUserKey']);
+        self::assertArrayNotHasKey('x-api-key', $transport->headers[0]);
+
+        try {
+            $service->getMe();
+            self::fail('expected BadMethodCallException');
+        } catch (BadMethodCallException $e) {
+            self::assertStringContainsString('Client::withoutApiKey()', $e->getMessage());
+        }
+
+        self::assertCount(1, $transport->headers);
+    }
+
     private function createBaseApiStub(): IntegraDteApiInterface
     {
         return new class () implements IntegraDteApiInterface {

@@ -221,7 +221,12 @@ $service->createDocument(new CreateDocumentRequest(
 
 ## Onboarding: login y primera empresa
 
-`login` y `createFirstBusiness` sirven para obtener el primer `x-api-key`. Ninguna de las dos envia el `x-api-key` de `Config`. `Config` sigue exigiendo un `apiKey` no vacio, asi que mientras aun no tienes uno puedes usar cualquier valor provisional.
+Un usuario nuevo solo tiene email y contraseña. `login` y `createFirstBusiness` sirven para obtener el primer `x-api-key`, y se llaman desde un cliente sin API key creado con `Client::withoutApiKey()`:
+
+- `getHealth`, `login` y `createFirstBusiness` funcionan y nunca envian `x-api-key`.
+- Cualquier otro metodo lanza `BadMethodCallException` antes de hacer la peticion.
+- `new Client(...)` sigue exigiendo un `apiKey` no vacio.
+- Para cambiar `baseUrl`, timeout o transporte, pasa un `Config` con `apiKey` vacio: `Client::withoutApiKey(new Config(apiKey: '', baseUrl: '...'))`.
 
 ```php
 <?php
@@ -232,7 +237,7 @@ use IntegraDte\Application\Service;
 use IntegraDte\Domain\CreateFirstBusinessRequest;
 use IntegraDte\Domain\LoginRequest;
 
-$bootstrap = new Service(new Client(new Config(apiKey: 'pendiente')));
+$bootstrap = new Service(Client::withoutApiKey());
 
 $login = $bootstrap->login(new LoginRequest(email: 'yo@empresa.cl', password: 'secreto'));
 $userKey = $login['data']['xUserKey'];
