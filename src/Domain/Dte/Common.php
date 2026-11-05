@@ -479,16 +479,66 @@ final class Referencia implements \JsonSerializable
     }
 }
 
+/**
+ * Chofer identifica a quien conduce. El esquema del SII lo exige como bloque propio dentro de
+ * Transporte, no como campos planos.
+ */
+final class Chofer implements \JsonSerializable
+{
+    use JsonHelpers;
+
+    public function __construct(
+        public ?string $rutChofer = null,
+        public ?string $nombreChofer = null
+    ) {
+    }
+
+    public function jsonSerialize(): array
+    {
+        return $this->clean([
+            'RUTChofer' => $this->rutChofer,
+            'NombreChofer' => $this->nombreChofer,
+        ]);
+    }
+}
+
+/**
+ * Transporte es el bloque de transporte del documento, que va DENTRO de Encabezado, entre
+ * Receptor y Totales.
+ *
+ * PatenteCarro, FchSalida, HraSalida y FchLlegada los agrego el Formato DTE v2.5 (2026-02) y
+ * la Res. Ex. SII N 144 de 2026 los volvio obligatorios para los documentos que amparan
+ * traslado de bienes. Aca son opcionales porque la API todavia no los exige.
+ *
+ * El SII valida los formatos al caracter: FchSalida y FchLlegada en AAAA-MM-DD, y HraSalida en
+ * HH:MM:SS con segundos y ceros a la izquierda. Tanto "08:30" como "8:30:00" se rechazan.
+ *
+ * Los parametros nuevos van al final de la firma para no romper a quien construya por posicion.
+ * El orden del payload lo decide jsonSerialize(), que emite la secuencia del esquema.
+ */
 final class Transporte implements \JsonSerializable
 {
     use JsonHelpers;
 
+    /**
+     * @param string|null $nombreChofer Deprecated: usar $chofer.
+     * @param string|null $rutChofer    Deprecated: usar $chofer.
+     * @param string|null $nroLicencia  Deprecated: el SII no lo declara. No se serializa.
+     */
     public function __construct(
         public ?string $patente = null,
         public ?string $rutTrans = null,
         public ?string $nombreChofer = null,
         public ?string $dirDest = null,
-        public ?string $cmnaDest = null
+        public ?string $cmnaDest = null,
+        public ?string $patenteCarro = null,
+        public ?Chofer $chofer = null,
+        public ?string $ciudadDest = null,
+        public ?string $fchSalida = null,
+        public ?string $hraSalida = null,
+        public ?string $fchLlegada = null,
+        public ?string $rutChofer = null,
+        public ?string $nroLicencia = null
     ) {
     }
 
@@ -496,18 +546,34 @@ final class Transporte implements \JsonSerializable
     {
         return $this->clean([
             'Patente' => $this->patente,
+            'PatenteCarro' => $this->patenteCarro,
             'RUTTrans' => $this->rutTrans,
-            'NombreChofer' => $this->nombreChofer,
+            'Chofer' => $this->bloqueChofer($this->chofer, $this->rutChofer, $this->nombreChofer),
             'DirDest' => $this->dirDest,
             'CmnaDest' => $this->cmnaDest,
+            'CiudadDest' => $this->ciudadDest,
+            'FchSalida' => $this->fchSalida,
+            'HraSalida' => $this->hraSalida,
+            'FchLlegada' => $this->fchLlegada,
         ]);
     }
 }
 
+/**
+ * TransporteGuia era el bloque propio de la guia (52). El esquema del SII define un unico
+ * Transporte igual para todos los tipos, asi que esta clase emite exactamente lo mismo.
+ *
+ * Deprecated: usar Transporte.
+ */
 final class TransporteGuia implements \JsonSerializable
 {
     use JsonHelpers;
 
+    /**
+     * @param string|null $nombreChofer Deprecated: usar $chofer.
+     * @param string|null $rutChofer    Deprecated: usar $chofer.
+     * @param string|null $nroLicencia  Deprecated: el SII no lo declara. No se serializa.
+     */
     public function __construct(
         public ?string $patente = null,
         public ?string $rutTrans = null,
@@ -516,7 +582,12 @@ final class TransporteGuia implements \JsonSerializable
         public ?string $nroLicencia = null,
         public ?string $dirDest = null,
         public ?string $cmnaDest = null,
-        public ?string $ciudadDest = null
+        public ?string $ciudadDest = null,
+        public ?string $patenteCarro = null,
+        public ?Chofer $chofer = null,
+        public ?string $fchSalida = null,
+        public ?string $hraSalida = null,
+        public ?string $fchLlegada = null
     ) {
     }
 
@@ -524,13 +595,15 @@ final class TransporteGuia implements \JsonSerializable
     {
         return $this->clean([
             'Patente' => $this->patente,
+            'PatenteCarro' => $this->patenteCarro,
             'RUTTrans' => $this->rutTrans,
-            'NombreChofer' => $this->nombreChofer,
-            'RUTChofer' => $this->rutChofer,
-            'NroLicencia' => $this->nroLicencia,
+            'Chofer' => $this->bloqueChofer($this->chofer, $this->rutChofer, $this->nombreChofer),
             'DirDest' => $this->dirDest,
             'CmnaDest' => $this->cmnaDest,
             'CiudadDest' => $this->ciudadDest,
+            'FchSalida' => $this->fchSalida,
+            'HraSalida' => $this->hraSalida,
+            'FchLlegada' => $this->fchLlegada,
         ]);
     }
 }

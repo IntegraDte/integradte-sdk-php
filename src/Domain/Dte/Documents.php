@@ -8,13 +8,19 @@ final class Encabezado33 implements \JsonSerializable
 {
     use JsonHelpers;
 
-    public function __construct(public IdDocBase $idDoc, public Emisor $emisor, public Receptor $receptor, public Totales $totales)
+    public function __construct(public IdDocBase $idDoc, public Emisor $emisor, public Receptor $receptor, public Totales $totales, public ?Transporte $transporte = null)
     {
     }
 
     public function jsonSerialize(): array
     {
-        return ['IdDoc' => $this->idDoc, 'Emisor' => $this->emisor, 'Receptor' => $this->receptor, 'Totales' => $this->totales];
+        return $this->clean([
+            'IdDoc' => $this->idDoc,
+            'Emisor' => $this->emisor,
+            'Receptor' => $this->receptor,
+            'Transporte' => $this->transporte,
+            'Totales' => $this->totales,
+        ]);
     }
 }
 
@@ -22,13 +28,19 @@ final class Encabezado34 implements \JsonSerializable
 {
     use JsonHelpers;
 
-    public function __construct(public IdDocBase $idDoc, public Emisor $emisor, public Receptor $receptor, public Totales $totales)
+    public function __construct(public IdDocBase $idDoc, public Emisor $emisor, public Receptor $receptor, public Totales $totales, public ?Transporte $transporte = null)
     {
     }
 
     public function jsonSerialize(): array
     {
-        return ['IdDoc' => $this->idDoc, 'Emisor' => $this->emisor, 'Receptor' => $this->receptor, 'Totales' => $this->totales];
+        return $this->clean([
+            'IdDoc' => $this->idDoc,
+            'Emisor' => $this->emisor,
+            'Receptor' => $this->receptor,
+            'Transporte' => $this->transporte,
+            'Totales' => $this->totales,
+        ]);
     }
 }
 
@@ -64,13 +76,19 @@ final class Encabezado46 implements \JsonSerializable
 {
     use JsonHelpers;
 
-    public function __construct(public IdDocBase $idDoc, public Emisor $emisor, public Receptor $receptor, public Totales $totales)
+    public function __construct(public IdDocBase $idDoc, public Emisor $emisor, public Receptor $receptor, public Totales $totales, public ?Transporte $transporte = null)
     {
     }
 
     public function jsonSerialize(): array
     {
-        return ['IdDoc' => $this->idDoc, 'Emisor' => $this->emisor, 'Receptor' => $this->receptor, 'Totales' => $this->totales];
+        return $this->clean([
+            'IdDoc' => $this->idDoc,
+            'Emisor' => $this->emisor,
+            'Receptor' => $this->receptor,
+            'Transporte' => $this->transporte,
+            'Totales' => $this->totales,
+        ]);
     }
 }
 
@@ -78,13 +96,19 @@ final class Encabezado52 implements \JsonSerializable
 {
     use JsonHelpers;
 
-    public function __construct(public IdDocGuia $idDoc, public Emisor $emisor, public Receptor $receptor, public TotalesGuia $totales)
+    public function __construct(public IdDocGuia $idDoc, public Emisor $emisor, public Receptor $receptor, public TotalesGuia $totales, public ?Transporte $transporte = null)
     {
     }
 
     public function jsonSerialize(): array
     {
-        return ['IdDoc' => $this->idDoc, 'Emisor' => $this->emisor, 'Receptor' => $this->receptor, 'Totales' => $this->totales];
+        return $this->clean([
+            'IdDoc' => $this->idDoc,
+            'Emisor' => $this->emisor,
+            'Receptor' => $this->receptor,
+            'Transporte' => $this->transporte,
+            'Totales' => $this->totales,
+        ]);
     }
 }
 
@@ -92,13 +116,19 @@ final class Encabezado56 implements \JsonSerializable
 {
     use JsonHelpers;
 
-    public function __construct(public IdDocBase $idDoc, public Emisor $emisor, public Receptor $receptor, public Totales $totales)
+    public function __construct(public IdDocBase $idDoc, public Emisor $emisor, public Receptor $receptor, public Totales $totales, public ?Transporte $transporte = null)
     {
     }
 
     public function jsonSerialize(): array
     {
-        return ['IdDoc' => $this->idDoc, 'Emisor' => $this->emisor, 'Receptor' => $this->receptor, 'Totales' => $this->totales];
+        return $this->clean([
+            'IdDoc' => $this->idDoc,
+            'Emisor' => $this->emisor,
+            'Receptor' => $this->receptor,
+            'Transporte' => $this->transporte,
+            'Totales' => $this->totales,
+        ]);
     }
 }
 
@@ -106,13 +136,19 @@ final class Encabezado61 implements \JsonSerializable
 {
     use JsonHelpers;
 
-    public function __construct(public IdDocBase $idDoc, public Emisor $emisor, public Receptor $receptor, public Totales $totales)
+    public function __construct(public IdDocBase $idDoc, public Emisor $emisor, public Receptor $receptor, public Totales $totales, public ?Transporte $transporte = null)
     {
     }
 
     public function jsonSerialize(): array
     {
-        return ['IdDoc' => $this->idDoc, 'Emisor' => $this->emisor, 'Receptor' => $this->receptor, 'Totales' => $this->totales];
+        return $this->clean([
+            'IdDoc' => $this->idDoc,
+            'Emisor' => $this->emisor,
+            'Receptor' => $this->receptor,
+            'Transporte' => $this->transporte,
+            'Totales' => $this->totales,
+        ]);
     }
 }
 
