@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.3.2...integradte-sdk-php-v0.3.3) (2026-11-05)
+
+
+### Features
+
+* **dte:** el bloque Transporte acepta los datos que exige la Res. 144 ([9f2811d](https://github.com/IntegraDte/integradte-sdk-php/commit/9f2811d862912ab0cf416ea58f85b138b281c850))
+
 ## [0.3.2](https://github.com/IntegraDte/integradte-sdk-php/compare/integradte-sdk-php-v0.3.1...integradte-sdk-php-v0.3.2) (2026-09-12)
 
 
